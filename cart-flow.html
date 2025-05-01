@@ -1,306 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Checkout – Shipping & Pickup</title>
-  <style>
-    :root {
-      --primary-color: #002366;
-      --accent-color: #0047b3;
-      --border: #d1d9e6;
-      --bg: #f4f6f8;
-      --card-bg: #ffffff;
-      --text: #333333;
-    }
-    body {
-      font-family: 'Times New Roman', serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 20px;
-    }
-    h2 {
-      color: var(--primary-color);
-      margin-bottom: 16px;
-      font-size: 1.5em;
-    }
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-      margin-bottom: 48px;
-    }
-    .column {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 20px;
-      flex: 1;
-      min-width: 300px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-    .header {
-      background: var(--primary-color);
-      color: #fff;
-      padding: 12px;
-      border-radius: 6px;
-      text-align: center;
-      font-size: 1.1em;
-      margin-bottom: 20px;
-    }
-    .steps {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      font-size: 0.9em;
-    }
-    .step {
-      position: relative;
-      padding-right: 16px;
-      color: var(--text);
-    }
-    .step:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      right: 4px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 8px;
-      height: 2px;
-      background: var(--border);
-    }
-    .active {
-      font-weight: bold;
-      color: var(--primary-color);
-    }
-    .fulfillment {
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background: #fff;
-      padding: 16px;
-      margin-bottom: 24px;
-    }
-    .fulfillment-header {
-      font-weight: bold;
-      color: var(--primary-color);
-      margin-bottom: 10px;
-      font-size: 1em;
-    }
-    .delivery-time {
-      background: #e3f2fd;
-      border-radius: 12px;
-      padding: 2px 8px;
-      font-size: 0.8em;
-      margin-left: 8px;
-    }
-    .address {
-      background: #fbfcfd;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 10px;
-      font-size: 0.9em;
-      margin-bottom: 20px;
-    }
-    .product {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .product-image {
-      width: 60px;
-      height: 60px;
-      background: #eef2f7;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75em;
-      color: var(--text);
-    }
-    .product-title {
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-    .note {
-      font-size: 0.85em;
-      font-style: italic;
-      color: var(--text);
-    }
-    .selection {
-      margin-bottom: 16px;
-    }
-    .selection strong {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 0.95em;
-    }
-    .option {
-      margin-bottom: 12px;
-    }
-    .option label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .option:hover {
-      background: #f0f4fb;
-    }
-    .option input {
-      accent-color: var(--accent-color);
-    }
-    .continue-btn {
-      display: block;
-      width: 100%;
-      padding: 14px 0;
-      background: var(--accent-color);
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 1em;
-      transition: background 0.2s;
-    }
-    .continue-btn:hover {
-      background: #003a99;
-    }
-    .totals {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 8px;
-      font-weight: bold;
-      font-size: 0.95em;
-    }
-    .single-speed {
-      font-size: 0.95em;
-      margin-top: 8px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Checkout – Shipping & Pickup</title>
+<style>
+:root{--primary:#002366;--accent:#0047b3;--border:#d1d9e6;--bg:#f4f6f8;--card:#ffffff;--txt:#333}
+body{font-family:'Times New Roman',serif;background:var(--bg);color:var(--txt);margin:0;padding:20px}
+h2{color:var(--primary);margin-bottom:16px;font-size:1.5em}
+.container{display:flex;flex-wrap:wrap;gap:24px;margin-bottom:48px}
+.column{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;flex:1;min-width:300px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.header{background:var(--primary);color:#fff;padding:12px;border-radius:6px;text-align:center;font-size:1.1em;margin-bottom:20px}
+.steps{display:flex;gap:12px;margin-bottom:24px;font-size:.9em}
+.step{position:relative;padding-right:16px;color:var(--txt)}
+.step:not(:last-child)::after{content:'';position:absolute;right:4px;top:50%;transform:translateY(-50%);width:8px;height:2px;background:var(--border)}
+.active{font-weight:700;color:var(--primary)}
+.fulfillment{border:1px solid var(--border);border-radius:6px;background:#fff;padding:16px;margin-bottom:24px}
+.fulfillment-header{font-weight:700;color:var(--primary);margin-bottom:10px;font-size:1em}
+.delivery-time{background:#e3f2fd;border-radius:12px;padding:2px 8px;font-size:.8em;margin-left:8px}
+.address{background:#fbfcfd;border:1px solid var(--border);border-radius:4px;padding:10px;font-size:.9em;margin-bottom:20px}
+.product{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.product-image{width:60px;height:60px;background:#eef2f7;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.75em;color:var(--txt)}
+.product-title{font-weight:700;margin-bottom:4px}
+.note{font-size:.85em;font-style:italic;color:var(--txt)}
+.selection{margin-bottom:16px}
+.selection strong{display:block;margin-bottom:8px;font-size:.95em}
+.option{margin-bottom:12px}
+.option label{display:flex;align-items:center;gap:8px;padding:8px;border-radius:4px;cursor:pointer;transition:background .2s}
+.option:hover{background:#f0f4fb}
+.option input{accent-color:var(--accent)}
+.continue-btn{display:block;width:100%;padding:14px 0;background:var(--accent);color:#fff;border:none;border-radius:4px;font-weight:700;cursor:pointer;font-size:1em;transition:background .2s}
+.continue-btn:hover{background:#003a99}
+.totals{display:flex;justify-content:space-between;margin-top:8px;font-weight:700;font-size:.95em}
+.single-speed{font-size:.95em;margin-top:8px}
+</style>
 </head>
 <body>
 
-  <h2>Dropship-Only Cart</h2>
-  <div class="container">
-    <div class="column">
-      <div class="header">Step 1 • Shipping & Pickup</div>
-      <div class="steps">
-        <span class="step active">Shipping & Pickup</span>
-        <span class="step">Payment & Review</span>
-        <span class="step">Confirmation</span>
-      </div>
-      <div class="fulfillment">
-        <div class="fulfillment-header">Ship to Home
-          <span class="delivery-time">Arrives May 8–10</span>
-        </div>
-        <div class="address">
-          123 Main Street<br>Anytown, CA 94000
-        </div>
-        <div class="product">
-          <div class="product-image">Image</div>
-          <div>
-            <div class="product-title">Blendtec Mini Wildside Jar</div>
-            <div class="note">Ships directly from vendor</div>
-          </div>
-        </div>
-        <p class="single-speed">Standard Shipping — FREE</p>
-      </div>
-      <button class="continue-btn">Continue to Payment</button>
-    </div>
-    <div class="column">
-      <div class="header">Order Summary</div>
-      <div class="product">
-        <div class="product-image">Image</div>
-        <div>
-          <div class="product-title">Blendtec Mini Wildside Jar</div>
-          Qty: 1 • $99.99
-        </div>
-      </div>
-      <div class="totals"><span>Subtotal:</span><span>$99.99</span></div>
-      <div class="totals"><span>Shipping:</span><span>FREE</span></div>
-      <div class="totals"><span>Total:</span><span>$99.99</span></div>
-    </div>
-  </div>
+<h2>Dropship-Only Cart</h2>
+<div class="container">
+<div class="column">
+<div class="header">Step 1 • Shipping & Pickup</div>
+<div class="steps"><span class="step active">Shipping & Pickup</span><span class="step">Payment & Review</span><span class="step">Confirmation</span></div>
+<div class="fulfillment">
+<div class="fulfillment-header">Ship to Home <span class="delivery-time">Arrives May 8–10</span></div>
+<div class="address">123 Main Street<br>Anytown, CA 94000</div>
+<div class="product"><div class="product-image">Image</div><div><div class="product-title">Blendtec Mini Wildside Jar</div><div class="note">Ships directly from vendor</div></div></div>
+<p class="single-speed">Standard Shipping — FREE</p>
+</div>
+<button class="continue-btn">Continue to Payment</button>
+</div>
+<div class="column">
+<div class="header">Order Summary</div>
+<div class="product"><div class="product-image">Image</div><div><div class="product-title">Blendtec Mini Wildside Jar</div>Qty: 1 • $99.99</div></div>
+<div class="totals"><span>Subtotal:</span><span>$99.99</span></div><div class="totals"><span>Shipping:</span><span>FREE</span></div><div class="totals"><span>Total:</span><span>$99.99</span></div>
+</div>
+</div>
 
-  <h2>Mixed Cart</h2>
-  <div class="container">
-    <div class="column">
-      <div class="header">Step 1 • Shipping & Pickup</div>
-      <div class="steps">
-        <span class="step active">Shipping & Pickup</span>
-        <span class="step">Payment & Review</span>
-        <span class="step">Confirmation</span>
-      </div>
-      <div class="fulfillment">
-        <div class="fulfillment-header">Ship to Home
-          <span class="delivery-time">Arrives by May 10</span>
-        </div>
-        <div class="address">
-          123 Main Street<br>Anytown, CA 94000
-        </div>
-        <div class="product">
-          <div class="product-image">Image</div>
-          <div>
-            <div class="product-title">Blendtec Mini Wildside Jar</div>
-            <div class="note">Vendor-shipped (5–7 days)</div>
-          </div>
-        </div>
-        <div class="product">
-          <div class="product-image">Image</div>
-          <div>
-            <div class="product-title">Jo Malone Cologne</div>
-          </div>
-        </div>
-        <div class="selection">
-          <strong>Shipping Speed</strong>
-          <div class="option">
-            <label>
-              <input type="radio" name="speed" checked>
-              <span>Standard Shipping <span class="delivery-time">5–7 days</span> — FREE</span>
-            </label>
-          </div>
-          <div class="option">
-            <label>
-              <input type="radio" name="speed">
-              <span>Priority <span class="delivery-time">3–5 days</span> — $12.95 <span class="note">(Vendor item may still take 5–7 days)</span></span>
-            </label>
-          </div>
-          <div class="option">
-            <label>
-              <input type="radio" name="speed">
-              <span>Express <span class="delivery-time">1–2 days</span> — $17.95 <span class="note">(Vendor item may still take 5–7 days)</span></span>
-            </label>
-          </div>
-        </div>
-      </div>
-      <button class="continue-btn">Continue to Payment</button>
-    </div>
-    <div class="column">
-      <div class="header">Order Summary</div>
-      <div class="product">
-        <div class="product-image">Image</div>
-        <div>
-          <div class="product-title">Blendtec Mini Wildside Jar</div>
-          Qty: 1 • $99.99
-        </div>
-      </div>
-      <div class="product">
-        <div class="product-image">Image</div>
-        <div>
-          <div class="product-title">Jo Malone Cologne</div>
-          Qty: 1 • $100.00
-        </div>
-      </div>
-      <div class="totals"><span>Subtotal:</span><span>$199.99</span></div>
-      <div class="totals"><span>Shipping:</span><span>FREE</span></div>
-      <div class="totals"><span>Total:</span><span>$199.99</span></div>
-    </div>
-  </div>
+<h2>Mixed Cart – All Ship to Home</h2>
+<div class="container">
+<div class="column">
+<div class="header">Step 1 • Shipping & Pickup</div>
+<div class="steps"><span class="step active">Shipping & Pickup</span><span class="step">Payment & Review</span><span class="step">Confirmation</span></div>
+<div class="fulfillment">
+<div class="fulfillment-header">Ship to Home <span class="delivery-time">Arrives by May 10</span></div>
+<div class="address">123 Main Street<br>Anytown, CA 94000</div>
+<div class="product"><div class="product-image">Image</div><div><div class="product-title">Blendtec Mini Wildside Jar</div><div class="note">Vendor-shipped (5–7 days)</div></div></div>
+<div class="product"><div class="product-image">Image</div><div><div class="product-title">Jo Malone Cologne</div></div></div>
+<div class="selection"><strong>Shipping Speed</strong>
+<div class="option"><label><input type="radio" name="speed1" checked><span>Standard <span class="delivery-time">5–7 days</span> — FREE</span></label></div>
+<div class="option"><label><input type="radio" name="speed1"><span>Priority <span class="delivery-time">3–5 days</span> — $12.95 <span class="note">(Vendor item may still take 5–7 days)</span></span></label></div>
+<div class="option"><label><input type="radio" name="speed1"><span>Express <span class="delivery-time">1–2 days</span> — $17.95 <span class="note">(Vendor item may still take 5–7 days)</span></span></label></div>
+</div>
+</div>
+<button class="continue-btn">Continue to Payment</button>
+</div>
+<div class="column">
+<div class="header">Order Summary</div>
+<div class="product"><div class="product-image">Image</div><div><div class="product-title">Blendtec Mini Wildside Jar</div>Qty: 1 • $99.99</div></div>
+<div class="product"><div class="product-image">Image</div><div><div class="product-title">Jo Malone Cologne</div>Qty: 1 • $100.00</div></div>
+<div class="totals"><span>Subtotal:</span><span>$199.99</span></div><div class="totals"><span>Shipping:</span><span>FREE</span></div><div class="totals"><span>Total:</span><span>$199.99</span></div>
+</div>
+</div>
+
+<h2>Mixed Cart – Store Pickup + Ship to Home</h2>
+<div class="container">
+<div class="column">
+<div class="header">Step 1 • Shipping & Pickup</div>
+<div class="steps"><span class="step active">Shipping & Pickup</span><span class="step">Payment & Review</span><span class="step">Confirmation</span></div>
+
+<div class="fulfillment">
+<div class="fulfillment-header">Store Pickup <span class="delivery-time">Ready May 7</span></div>
+<div class="address">NEX Norfolk Main Store<br>Norfolk, VA</div>
+<div class="product"><div class="product-image">Image</div><div><div class="product-title">Apple Watch Band</div></div></div>
+</div>
+
+<div class="fulfillment">
+<div class="fulfillment-header">Ship to Home <span class="delivery-time">Arrives May 8–10</span></div>
+<div class="address">123 Main Street<br>Anytown, CA 94000</div>
+<div class="product"><div class="product-image">Image</div><div><div class="product-title">Blendtec Mini Wildside Jar</div><div class="note">Vendor-shipped (5–7 days)</div></div></div>
+<p class="single-speed">Standard Shipping — FREE</p>
+</div>
+
+<button class="continue-btn">Continue to Payment</button>
+</div>
+<div class="column">
+<div class="header">Order Summary</div>
+<div class="product"><div class="product-image">Image</div><div><div class="product-title">Apple Watch Band</div>Qty: 1 • $49.99</div></div>
+<div class="product"><div class="product-image">Image</div><div><div class="product-title">Blendtec Mini Wildside Jar</div>Qty: 1 • $99.99</div></div>
+<div class="totals"><span>Subtotal:</span><span>$149.98</span></div><div class="totals"><span>Shipping:</span><span>FREE</span></div><div class="totals"><span>Total:</span><span>$149.98</span></div>
+</div>
+</div>
 
 </body>
 </html>
