@@ -1,453 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MNE.com Carousel Generator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            navy:  '#002366',
-            gold:  '#ffc72c',
-            danger:'#b91c1c'
-          }
-        }
-      }
-    };
-  </script>
-
-  <!-- libs -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-
-  <style>
-    .badge{position:absolute;top:6px;left:6px;background:#ffc72c;color:#002366;font-weight:700;font-size:.75rem;padding:2px 6px;border-radius:9999px}
-    .placeholder{background:#e2e8f0;display:flex;align-items:center;justify-content:center;height:200px;font-size:.875rem;color:#6b7280}
-    .promo-badge{position:absolute;top:6px;right:6px;background:#002366;color:#fff;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px}
-  </style>
+<meta charset="UTF-8" />
+<title>MNE.com Carousel Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{navy:'#002366',gold:'#ffc72c',danger:'#b91c1c'}}}}</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<style>
+  .badge{position:absolute;top:6px;left:6px;background:#ffc72c;color:#002366;font-weight:700;font-size:.75rem;padding:2px 6px;border-radius:9999px}
+  .placeholder{background:#e2e8f0;display:flex;align-items:center;justify-content:center;height:200px;font-size:.875rem;color:#6b7280}
+  .promo-badge{position:absolute;top:6px;right:6px;background:#002366;color:#fff;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px}
+  .star{color:#ffc72c;font-size:.75rem;margin-right:1px}
+</style>
 </head>
-
 <body class="bg-gray-100 min-h-screen p-6 flex flex-col gap-6">
-  <!-- HEADER -->
-  <header class="bg-navy text-white p-4 rounded-lg shadow mb-4">
-    <h1 class="text-3xl font-semibold">MNE.com Carousel Generator</h1>
-  </header>
+<header class="bg-navy text-white p-4 rounded-lg shadow mb-4"><h1 class="text-3xl font-semibold">MNE.com Carousel Generator</h1></header>
 
-  <!-- MAIN GRID -->
-  <div class="grid lg:grid-cols-3 gap-6 w-full">
-    <!-- BUILDER -->
-    <div class="lg:col-span-1 space-y-6">
-      <form id="builder" class="space-y-4">
-        <div>
-          <label class="block font-medium mb-1">Carousel Title</label>
-          <input id="carouselTitle" type="text" class="w-full border rounded p-2"/>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <input id="showReviews" type="checkbox" class="h-4 w-4" checked>
-          <label for="showReviews">Include review count</label>
-        </div>
-
-        <div>
-          <label class="block font-medium mb-1">Template Type</label>
-          <select id="templateSelect" class="border rounded p-2 w-full">
-            <option value="standard">Standard – Brand, Name, MSRP, Price</option>
-            <option value="promo">Promo – Name, Price, Badge</option>
-            <option value="minimal">Minimal – Image &amp; Name</option>
-          </select>
-        </div>
-
-        <div id="itemsContainer" class="space-y-6"></div>
-
-        <button id="addItem" type="button"
-                class="w-full px-4 py-2 bg-gold text-navy rounded shadow">
-          Add Item (0/10)
-        </button>
-
-        <hr class="my-4"/>
-
-        <h2 class="font-semibold text-lg mb-2">Bulk CSV Upload</h2>
-        <input type="file" id="csvFile" accept=".csv" class="mb-2"><br>
-        <a href="https://snik-dev.github.io/nex/template.csv"
-           class="text-navy underline text-sm" target="_blank">
-          Download CSV template
-        </a>
-      </form>
-    </div>
-
-    <!-- PREVIEW -->
-    <div class="lg:col-span-2">
-      <h2 class="text-xl font-semibold mb-2">
-        Live Preview <span class="text-sm text-gray-600">(drag to reorder)</span>
-      </h2>
-
-      <div id="previewTitle" class="font-semibold mb-4 text-lg"></div>
-      <div id="previewArea"
-           class="flex flex-col gap-4 bg-white border rounded p-4 min-h-[260px]">
-      </div>
-      <div id="a11yReport" class="mt-4 text-danger text-sm"></div>
-    </div>
+<div class="grid lg:grid-cols-3 gap-6 w-full">
+  <div class="lg:col-span-1 space-y-6">
+    <form id="builder" class="space-y-4">
+      <div><label class="block font-medium mb-1">Carousel Title</label><input id="carouselTitle" type="text" class="w-full border rounded p-2"></div>
+      <div class="flex items-center gap-2"><input id="showReviews" type="checkbox" class="h-4 w-4" checked><label for="showReviews">Include review count</label></div>
+      <div><label class="block font-medium mb-1">Template Type</label><select id="templateSelect" class="border rounded p-2 w-full"><option value="standard">Standard – Brand, Name, MSRP, Price</option><option value="promo">Promo – Name, Price, Badge</option><option value="minimal">Minimal – Image & Name</option></select></div>
+      <div id="itemsContainer" class="space-y-6"></div>
+      <button id="addItem" type="button" class="w-full px-4 py-2 bg-gold text-navy rounded shadow">Add Item (0/10)</button>
+      <hr class="my-4"><h2 class="font-semibold text-lg mb-2">Bulk CSV Upload</h2><input type="file" id="csvFile" accept=".csv" class="mb-2"><br><a href="https://snik-dev.github.io/nex/template.csv" target="_blank" class="text-navy underline text-sm">Download CSV template</a>
+    </form>
   </div>
-
-  <!-- OUTPUT + IMPORT -->
-  <div class="grid lg:grid-cols-2 gap-6 mt-6">
-    <div>
-      <h2 class="text-xl font-semibold mb-2">Generated HTML</h2>
-      <textarea id="output" class="w-full h-64 border p-2 font-mono text-xs"></textarea>
-      <button id="copyCode" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">
-        Copy
-      </button>
-    </div>
-
-    <div>
-      <h2 class="text-xl font-semibold mb-2">HTML Input (Import)</h2>
-      <textarea id="importHtml" class="w-full h-64 border p-2 font-mono text-xs"></textarea>
-      <button id="importBtn" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">
-        Import
-      </button>
-    </div>
+  <div class="lg:col-span-2">
+    <h2 class="text-xl font-semibold mb-2">Live Preview <span class="text-sm text-gray-600">(drag to reorder)</span></h2>
+    <div id="previewTitle" class="font-semibold mb-4 text-lg"></div>
+    <div id="previewArea" class="flex gap-4 overflow-x-auto pb-4"></div>
+    <div id="a11yReport" class="mt-4 text-danger text-sm"></div>
   </div>
+</div>
 
-  <!-- ITEM TEMPLATE -->
-  <template id="itemTemplate">
-    <div class="border p-4 rounded space-y-3 bg-white shadow" data-item>
-      <div class="flex justify-between items-center">
-        <span class="font-bold itemIndex">#</span>
-        <button type="button" class="removeItem px-2 py-1 bg-red-500 text-white rounded">Remove</button>
-      </div>
+<div class="grid lg:grid-cols-2 gap-6 mt-6"><div><h2 class="text-xl font-semibold mb-2">Generated HTML</h2><textarea id="output" class="w-full h-64 border p-2 font-mono text-xs"></textarea><button id="copyCode" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">Copy</button></div><div><h2 class="text-xl font-semibold mb-2">HTML Input (Import)</h2><textarea id="importHtml" class="w-full h-64 border p-2 font-mono text-xs"></textarea><button id="importBtn" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">Import</button></div></div>
 
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-        <input type="url"  placeholder="Product Link URL"
-               class="productLink border rounded p-2 col-span-2 md:col-span-3">
-        <input type="text" placeholder="Product Name"
-               class="productName border rounded p-2 col-span-2 md:col-span-3">
-        <input type="text" placeholder="Brand" class="productBrand border rounded p-2">
-        <input type="url"  placeholder="Image URL"
-               class="productImage border rounded p-2 col-span-2">
-        <input type="text" placeholder="MSRP"  class="productMsrp  border rounded p-2">
-        <input type="text" placeholder="Price" class="productPrice border rounded p-2">
-        <input type="number" step="0.5" min="0" max="5"
-               placeholder="Rating"  class="productRating border rounded p-2">
-        <input type="number" placeholder="Reviews"
-               class="productReviews border rounded p-2">
+<template id="itemTemplate"><div class="border p-4 rounded space-y-3 bg-white shadow" data-item><div class="flex justify-between items-center"><span class="font-bold itemIndex">#</span><button type="button" class="removeItem px-2 py-1 bg-red-500 text-white rounded">Remove</button></div><div class="grid grid-cols-2 md:grid-cols-3 gap-2"><input type="url" placeholder="Product Link URL" class="productLink border rounded p-2 col-span-2 md:col-span-3"><input type="text" placeholder="Product Name" class="productName border rounded p-2 col-span-2 md:col-span-3"><input type="text" placeholder="Brand" class="productBrand border rounded p-2"><input type="url" placeholder="Image URL" class="productImage border rounded p-2 col-span-2"><input type="text" placeholder="MSRP" class="productMsrp border rounded p-2"><input type="text" placeholder="Price" class="productPrice border rounded p-2"><input type="number" step="0.5" min="0" max="5" placeholder="Rating" class="productRating border rounded p-2"><input type="number" placeholder="Reviews" class="productReviews border rounded p-2"><label class="col-span-2 md:col-span-3 text-sm font-medium">Promo Badge (optional)</label><select class="productBadge border rounded p-2 col-span-2 md:col-span-3"><option value="">None</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option></select></div></div></template>
 
-        <label class="col-span-2 md:col-span-3 text-sm font-medium">
-          Promo Badge (optional)
-        </label>
-        <select class="productBadge border rounded p-2 col-span-2 md:col-span-3">
-          <option value="">None</option>
-          <option value="clearance">Clearance</option>
-          <option value="last-chance">Last Chance</option>
-          <option value="new">New</option>
-          <option value="exclusive">NEX Exclusive</option>
-        </select>
-      </div>
-    </div>
-  </template>
-
-  <!-- CORE JS (ES5-compatible) -->
-  <script>
-    $(function () {
-      var BASE = 'https://www.mynavyexchange.com';
-      var MAX = 10;
-      var placeholder = '<div class="placeholder">No Image Added</div>';
-
-      /* ---------- helpers ---------- */
-      function fullPath(u) {
-        if (!u) return '';
-        return u.charAt(0) === '/' ? BASE + u : u;
-      }
-
-      function ratingGif(r) {
-        var val = parseFloat(r) || 0;
-        var rounded = Math.round(val * 2) / 2;  // 0.0 0.5 1.0 ...
-        var file = String(rounded).replace('.', '_'); // 4_5
-        return '<img alt="Product Rating ' + file +
-               '" class="ratingsStars" src="/ux/img/stars/rating-' +
-               file + '.gif">';
-      }
-
-      function badgeHTML(t) {
-        if (!t) return '';
-        var map = {
-          'clearance':   'Clearance',
-          'last-chance': 'Last Chance',
-          'new':         'New',
-          'exclusive':   'NEX Exclusive'
-        };
-        return '<span class="promo-badge" data-type="' + t + '">' +
-               map[t] + '</span>';
-      }
-
-      function updateCounts() {
-        var c = $('#itemsContainer [data-item]').length;
-        $('#addItem')
-          .text('Add Item (' + c + '/' + MAX + ')')
-          .prop('disabled', c >= MAX)
-          .toggleClass('opacity-50 cursor-not-allowed', c >= MAX);
-
-        $('#itemsContainer [data-item]').each(function (i, el) {
-          $(el).find('.itemIndex').text(i + 1);
-        });
-      }
-
-      function addItem(d) {
-        if ($('#itemsContainer [data-item]').length >= MAX) return;
-        d = d || {};
-
-        var node = document.getElementById('itemTemplate')
-                           .content.cloneNode(true);
-        $('#itemsContainer').append(node);
-
-        var $w = $('#itemsContainer [data-item]').last();
-        for (var k in d) {
-          if (d.hasOwnProperty(k)) {
-            $w.find('.product' + k.charAt(0).toUpperCase() + k.slice(1))
-              .val(d[k]);
-          }
-        }
-        updateCounts();
-        refresh();
-      }
-
-      /* ---------- events ---------- */
-      $('#addItem').on('click', function () { addItem(); });
-
-      $('#itemsContainer').on('click', '.removeItem', function () {
-        $(this).closest('[data-item]').remove();
-        updateCounts();
-        refresh();
-      });
-
-      $('#builder').on('input change', 'input,select', refresh);
-
-      $('#csvFile').on('change', function (e) {
-        var file = e.target.files[0];
-        if (!file) return;
-
-        var reader = new FileReader();
-        reader.onload = function (evt) {
-          var rows = evt.target.result.split(/\r?\n/).filter(function (x) { return x.trim(); });
-          var header = rows.shift().split(',');
-
-          $('#itemsContainer').empty();
-          rows.forEach(function (line) {
-            var vals = line.split(',');
-            var obj = {};
-            header.forEach(function (h, i) {
-              obj[h.trim()] = vals[i] || '';
-            });
-            addItem(obj);
-          });
-        };
-        reader.readAsText(file);
-      });
-
-      $('#importBtn').on('click', function () {
-        var raw = $('#importHtml').val();
-        if (!raw.trim()) { alert('Paste an HTML snippet first.'); return; }
-
-        var doc = new DOMParser().parseFromString(raw, 'text/html');
-        var ttl = doc.querySelector('.sg-content-item .bold');
-        if (ttl) $('#carouselTitle').val(ttl.textContent.trim());
-
-        var cards = doc.querySelectorAll('.product-card_content');
-        if (!cards.length) {
-          alert('No .product-card_content elements found.'); return;
-        }
-
-        $('#itemsContainer').empty();
-        for (var i = 0; i < cards.length; i++) {
-          var c = cards[i];
-
-          var altEl = c.querySelector('.ratingsStars');
-          var alt   = altEl ? altEl.getAttribute('alt') : '';
-          var m     = alt.match(/([0-5](?:_[05])?)/);
-
-          addItem({
-            link:  (c.querySelector('a')     || {}).getAttribute ? c.querySelector('a').getAttribute('href') : '',
-            image: (c.querySelector('img')   || {}).getAttribute ? c.querySelector('img').getAttribute('src') : '',
-            brand: (c.querySelector('.product-card_brand') || {}).textContent ?
-                     c.querySelector('.product-card_brand').textContent.trim() : '',
-            name:  (c.querySelector('.product-card_name')  || {}).textContent ?
-                     c.querySelector('.product-card_name').textContent.trim() : '',
-            msrp:  (c.querySelector('.product-card_price_msrp_strike') || {}).textContent ?
-                     c.querySelector('.product-card_price_msrp_strike').textContent.trim() : '',
-            price: (c.querySelector('.product-card_price_regular span') || {}).textContent ?
-                     c.querySelector('.product-card_price_regular span').textContent.trim() : '',
-            reviews: (function () {
-              var span = c.querySelector('.product-card_reviews span');
-              var txt  = span ? span.textContent : '';
-              var n    = txt.match(/\\d+/);
-              return n ? n[0] : '';
-            }()),
-            rating: m ? m[1].replace('_', '.') : '',
-            badge:  (c.querySelector('.promo-badge') || {}).dataset ?
-                      c.querySelector('.promo-badge').dataset.type : ''
-          });
-        }
-      });
-
-      /* ---------- preview + output ---------- */
-      function makePreviewCard(d, idx, tpl, showRev) {
-        var img = d.image ? '<img src="' + fullPath(d.image) + '" alt="' +
-                             (d.name || 'product') + '">' : placeholder;
-
-        var name  = d.name  ? '<div class="product-card_name">' + d.name  + '</div>' : '';
-        var brand = d.brand ? '<p class="product-card_brand font-semibold"><a href="' +
-                              fullPath(d.link) + '">' + d.brand + '</a></p>' : '';
-        var msrp  = d.msrp  ? '<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> ' +
-                              d.msrp + ' </span></div>' : '';
-        var price = d.price ? '<div class="product-card_price_regular">NEX Price <span> ' +
-                              d.price + ' </span></div>' : '';
-
-        var body = '';
-        if (tpl === 'minimal') body = name;
-        else if (tpl === 'promo') body = name + price;
-        else body = brand + name + msrp + price;
-
-        var reviews = showRev ?
-          '<div class="product-card_reviews mt-2 mb-2 d-flex align-items-center">' +
-            ratingGif(d.rating) + ' <span class="ml-2">(' + d.reviews + ')</span></div>' : '';
-
-        return (
-          '<div class="relative w-40" data-idx="' + idx + '">' +
-            '<div class="badge">' + (idx + 1) + '</div>' +
-            badgeHTML(d.badge) +
-            '<a href="' + fullPath(d.link) + '">' + img + '</a>' +
-            '<div class="text-sm mt-2">' + body + reviews + '</div>' +
-          '</div>'
-        );
-      }
-
-      function buildExport(arr, tpl, showRev) {
-        var inner = arr.map(function (d, i) {
-          var img = d.image ?
-            '<img src="' + d.image + '" alt="' + (d.name || 'product') + '">' :
-            placeholder;
-
-          var name  = d.name  ? '<div class="product-card_name">' + d.name  + '</div>' : '';
-          var brand = d.brand ? '<p class="product-card_brand"><a href="' +
-                                d.link + '">' + d.brand + '</a></p>' : '';
-          var msrp  = d.msrp  ? '<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> ' +
-                                d.msrp + ' </span></div>' : '';
-          var price = d.price ? '<div class="product-card_price_regular">NEX Price <span> ' +
-                                d.price + ' </span></div>' : '';
-
-          var body = '';
-          if (tpl === 'minimal') body = name;
-          else if (tpl === 'promo') body = name + price;
-          else body = brand + name + msrp + price;
-
-          var reviews = showRev ?
-            '<div class="product-card_reviews mt-2 mb-2 d-flex align-items-center">' +
-              ratingGif(d.rating) + ' <span class="ml-2">(' + d.reviews + ')</span></div>' : '';
-
-          return (
-            '<div class="product-card_content product-card_slider relative">'  +
-              '<span class="badge">' + (i + 1) + '</span>' +
-              badgeHTML(d.badge) +
-              '<div class="product-card_content_images p-0 mb-3">' +
-                '<a href="' + d.link + '">' + img + '</a></div>' +
-              '<div class="product-card_content_description">' +
-                body + reviews + '</div>' +
-            '</div>'
-          );
-        }).join('');
-
-        var html =
-          '<div class="sg-content col-12 row no-gutters">' +
-            '<div class="sg-content-item col-12 row align-items-center mx-0 my-4">' +
-              '<div class="col-12 bold mb-4" style="font-size:18px;">' +
-                $('#carouselTitle').val() +
-              '</div>' +
-              '<div class="owl-carousel recently-viewed-carousel owl-theme">' +
-                inner +
-              '</div>' +
-            '</div>' +
-          '</div>' +
-
-          '<script>' +
-          '$(document).ready(function(){' +
-            'var c=$(".recently-viewed-carousel");' +
-            'var len=c[0].children.length;' +
-            'c.owlCarousel({' +
-              'loop:false,rewind:true,margin:10,nav:true,slideBy:4,' +
-              'navText:[\"<span class=\\\"fas fa-chevron-left fa-2x\\\"></span>\",' +
-                        '\"<span class=\\\"fas fa-chevron-right fa-2x\\\"></span>\"],' +
-              'dots:true,' +
-              'responsive:{' +
-                '0:{items:3,loop:true},' +
-                '361:{items:3,loop:len>1},' +
-                '571:{items:3,loop:len>2},' +
-                '721:{items:4,loop:len>3},' +
-                '857:{items:5,loop:len>4},' +
-                '993:{items:5,loop:len>5}' +
-              '}' +
-            '});' +
-          '});' +
-          '<\\/script>';
-
-        $('#output').val(html.trim());
-      }
-
-      function refresh() {
-        var tpl  = $('#templateSelect').val();
-        var show = $('#showReviews').is(':checked');
-
-        $('#previewTitle').text($('#carouselTitle').val());
-
-        var items = [];
-        $('#itemsContainer [data-item]').each(function () {
-          var $e = $(this);
-          items.push({
-            link:    $e.find('.productLink').val(),
-            name:    $e.find('.productName').val(),
-            brand:   $e.find('.productBrand').val(),
-            image:   $e.find('.productImage').val(),
-            msrp:    $e.find('.productMsrp').val(),
-            price:   $e.find('.productPrice').val(),
-            rating:  $e.find('.productRating').val(),
-            reviews: $e.find('.productReviews').val(),
-            badge:   $e.find('.productBadge').val()
-          });
-        });
-
-        $('#previewArea').html(items.map(function (d, i) {
-          return makePreviewCard(d, i, tpl, show);
-        }).join(''));
-
-        var missingAlt = $('#previewArea img[alt=""]').length;
-        $('#a11yReport').text(missingAlt ? 'Image missing alt text' : '');
-
-        buildExport(items, tpl, show);
-      }
-
-      /* drag-reorder sync */
-      new Sortable(document.getElementById('previewArea'), {
-        animation: 150,
-        onEnd: function (evt) {
-          var $items = $('#itemsContainer [data-item]');
-          var moved  = $items.eq(evt.oldIndex);
-          if (evt.newIndex === 0) $('#itemsContainer').prepend(moved);
-          else $items.eq(evt.newIndex).before(moved);
-          updateCounts();
-          refresh();
-        }
-      });
-
-      $(document).on('click', '#copyCode', function () {
-        navigator.clipboard.writeText($('#output').val());
-      });
-
-      /* start with one blank row */
-      addItem();
-    });
-  </script>
+<script>
+$(function(){var BASE='https://www.mynavyexchange.com';var MAX=10;var placeholder='<div class="placeholder">No Image Added</div>';
+function full(u){return u&&u.charAt(0)==='/'?BASE+u:u;}
+function ratingStarsChar(r){var val=parseFloat(r)||0;var full=Math.floor(val);var half=val%1>=0.5;var html='';for(var i=0;i<full;i++){html+='<span class="star">★</span>';}if(half){html+='<span class="star">☆</span>';}return html;}
+function ratingGif(r){var v=parseFloat(r)||0;var rnd=Math.round(v*2)/2;var f=String(rnd).replace('.','_');return '<img alt="Product Rating '+f+'" class="ratingsStars" src="/ux/img/stars/rating-'+f+'.gif">';}
+function badge(t){if(!t)return'';var map={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'};return '<span class="promo-badge" data-type="'+t+'">'+map[t]+'</span>';}
+function setTemplateVisibility(){var tpl=$('#templateSelect').val();$('#itemsContainer [data-item]').each(function(){var $e=$(this);var showName=tpl!=='minimal';var showBrand=tpl==='standard';var showMsrp=tpl==='standard';var showPrice=tpl!=='minimal'||tpl==='promo';$e.find('.productName').parent().toggle(showName);$e.find('.productBrand').parent().toggle(showBrand);$e.find('.productMsrp').parent().toggle(showMsrp);$e.find('.productPrice').parent().toggle(showPrice);$e.find('select.productBadge').parent().toggle(tpl==='promo');});refresh();}
+function updateCounts(){var c=$('#itemsContainer [data-item]').length;$('#addItem').text('Add Item ('+c+'/'+MAX+')').prop('disabled',c>=MAX).toggleClass('opacity-50 cursor-not-allowed',c>=MAX);$('#itemsContainer [data-item]').each(function(i){$(this).find('.itemIndex').text(i+1);});}
+function addItem(d){if($('#itemsContainer [data-item]').length>=MAX)return;d=d||{};var node=document.getElementById('itemTemplate').content.cloneNode(true);$('#itemsContainer').append(node);var $w=$('#itemsContainer [data-item]').last();for(var k in d){$w.find('.product'+k.charAt(0).toUpperCase()+k.slice(1)).val(d[k]);}updateCounts();setTemplateVisibility();}
+$('#templateSelect').on('change',setTemplateVisibility);
+$('#addItem').on('click',function(){addItem();});
+$('#itemsContainer').on('click','.removeItem',function(){$(this).closest('[data-item]').remove();updateCounts();refresh();});
+$('#builder').on('input change','input,select',refresh);
+function previewCard(d,i,tpl,rev){var img=d.image?'<img src="'+full(d.image)+'" alt="'+(d.name||'product')+'">':placeholder;var name=d.name?'<div class="product-card_name">'+d.name+'</div>':'';var brand=d.brand?'<p class="product-card_brand font-semibold"><a href="'+full(d.link)+'">'+d.brand+'</a></p>':'';var msrp=d.msrp?'<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> '+d.msrp+' </span></div>':'';var price=d.price?'<div class="product-card_price_regular">NEX Price <span> '+d.price+' </span></div>':'';var body='';if(tpl==='minimal')body=name;else if(tpl==='promo')body=name+price;else body=brand+name+msrp+price;var reviews=rev?'<div class="product-card_reviews mt-2 mb-2 d-flex align-items-center">'+ratingStarsChar(d.rating)+' <span class="ml-2">('+d.reviews+')</span></div>':'';return '<div class="relative w-48" data-idx="'+i+'"><div class="badge">'+(i+1)+'</div>'+badge(d.badge)+'<a href="'+full(d.link)+'">'+img+'</a><div class="text-sm mt-2">'+body+reviews+'</div></div>';}
+function buildExport(arr,tpl,rev){var inner=arr.map(function(d,i){var img=d.image?'<img src="'+d.image+'" alt="'+(d.name||'product')+'">':placeholder;var name=d.name?'<div class="product-card_name">'+d.name+'</div>':'';var brand=d.brand?'<p class="product-card_brand"><a href="'+d.link+'">'+d.brand+'</a></p>':'';var msrp=d.msrp?'<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> '+d.msrp+' </span></div>':'';var price=d.price?'<div class="product-card_price_regular">NEX Price <span> '+d.price+' </span></div>':'';var body='';if(tpl==='minimal')body=name;else if(tpl==='promo')body=name+price;else body=brand+name+msrp+price;var reviews=rev?'<div class="product-card_reviews mt-2 mb-2 d-flex align-items-center">'+ratingGif(d.rating)+' <span class="ml-2">('+d.reviews+')</span></div>':'';return '<div class="product-card_content product-card_slider relative"><span class="badge">'+(i+1)+'</span>'+badge(d.badge)+'<div class="product-card_content_images p-0 mb-3"><a href="'+d.link+'">'+img+'</a></div><div class="product-card_content_description">'+body+reviews+'</div></div>';}).join('');var html='<div class="sg-content col-12 row no-gutters"><div class="sg-content-item col-12 row align-items-center mx-0 my-4"><div class="col-12 bold mb-4" style="font-size:18px;">'+$('#carouselTitle').val()+'</div><div class="owl-carousel recently-viewed-carousel owl-theme">'+inner+'</div></div></div><script>$(document).ready(function(){var c=$(\".recently-viewed-carousel\");var len=c[0].children.length;c.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,navText:[\'<span class=\\"fas fa-chevron-left fa-2x\\"></span>\',\'<span class=\\"fas fa-chevron-right fa-2x\\"></span>\'],dots:true,responsive:{0:{items:3,loop:true},361:{items:3,loop:len>1},571:{items:3,loop:len>2},721:{items:4,loop:len>3},857:{items:5,loop:len>4},993:{items:5,loop:len>5}}});});<\/script>';$('#output').val(html.trim());}
+function refresh(){var tpl=$('#templateSelect').val();var rev=$('#showReviews').is(':checked');$('#previewTitle').text($('#carouselTitle').val());var arr=[];$('#itemsContainer [data-item]').each(function(){var $e=$(this);arr.push({link:$e.find('.productLink').val(),name:$e.find('.productName').val(),brand:$e.find('.productBrand').val(),image:$e.find('.productImage').val(),msrp:$e.find('.productMsrp').val(),price:$e.find('.productPrice').val(),rating:$e.find('.productRating').val(),reviews:$e.find('.productReviews').val(),badge:$e.find('.productBadge').val()});});$('#previewArea').html(arr.map(function(d,i){return previewCard(d,i,tpl,rev);}).join(''));var miss=$('#previewArea img[alt=""]').length;$('#a11yReport').text(miss?'Image missing alt text':'');buildExport(arr,tpl,rev);}
+new Sortable(document.getElementById('previewArea'),{animation:150,onEnd:function(evt){var items=$('#itemsContainer [data-item]');var moved=items.eq(evt.oldIndex);if(evt.newIndex===0)$('#itemsContainer').prepend(moved);else items.eq(evt.newIndex).before(moved);updateCounts();refresh();}});
+$(document).on('click','#copyCode',function(){navigator.clipboard.writeText($('#output').val());});
+addItem();setTemplateVisibility();});
+</script>
 </body>
 </html>
