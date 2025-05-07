@@ -10,9 +10,9 @@
       theme: {
         extend: {
           colors: {
-            navy: "#002366",
-            navyLight: "#0047b3",
-            gold: "#ffc72c"
+            navy: '#002366',
+            navyLight: '#0047b3',
+            gold: '#ffc72c'
           }
         }
       }
@@ -23,10 +23,9 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
   <style>
-    .owl-carousel img {
-      width: 100%;
-      height: auto;
-    }
+    .owl-carousel img{width:100%;height:auto}
+    .badge{position:absolute;top:4px;left:4px;background:#ffc72c;color:#002366;font-weight:700;font-size:0.75rem;padding:2px 6px;border-radius:9999px}
+    .rating span{color:#ffc72c;font-size:0.875rem}
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-8 flex flex-col gap-8">
@@ -35,7 +34,6 @@
   </header>
 
   <div class="grid lg:grid-cols-2 gap-8 w-full">
-    <!-- Builder -->
     <div>
       <form id="builder" class="space-y-6">
         <div>
@@ -47,11 +45,10 @@
           <label for="showReviews">Include review count</label>
         </div>
         <div id="itemsContainer" class="space-y-6"></div>
-        <button id="addItem" type="button" class="px-4 py-2 bg-gold text-navy rounded shadow">Add Item</button>
+        <button id="addItem" type="button" class="px-4 py-2 bg-gold text-navy rounded shadow">Add Item (0/10)</button>
       </form>
     </div>
 
-    <!-- Preview & Output -->
     <div class="flex flex-col gap-6">
       <div>
         <h2 class="text-xl font-semibold mb-4">Live Preview</h2>
@@ -65,7 +62,6 @@
     </div>
   </div>
 
-  <!-- Item Template -->
   <template id="itemTemplate">
     <div class="border p-4 rounded space-y-3 bg-white shadow" data-item>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -84,90 +80,98 @@
   </template>
 
   <script>
-    $(function () {
-      function addItem() {
-        const tmpl = document.getElementById('itemTemplate').content.cloneNode(true);
-        $('#itemsContainer').append(tmpl);
+    $(function(){
+      let lastAddedIndex=-1;
+      function updateAddBtn(){
+        const count=$('#itemsContainer [data-item]').length;
+        const $btn=$('#addItem');
+        $btn.text(`Add Item (${count}/10)`);
+        $btn.prop('disabled',count>=10);
+        $btn.toggleClass('opacity-50 cursor-not-allowed',count>=10);
       }
-      $('#addItem').on('click', addItem);
-
-      $('#itemsContainer').on('click', '.removeItem', function () {
+      function addItem(){
+        const tmpl=document.getElementById('itemTemplate').content.cloneNode(true);
+        $('#itemsContainer').append(tmpl);
+        lastAddedIndex=$('#itemsContainer [data-item]').length-1;
+        updateAddBtn();
+        refresh();
+      }
+      $('#addItem').on('click',addItem);
+      $('#itemsContainer').on('click','.removeItem',function(){
         $(this).closest('[data-item]').remove();
+        updateAddBtn();
         refresh();
       });
-
-      // Auto-fill via OpenGraph / meta tags
-      $('#itemsContainer').on('click', '.fetchData', async function () {
-        const $wrap = $(this).closest('[data-item]');
-        const url = $wrap.find('.productLink').val();
-        if (!url) return;
-        try {
-          const res = await fetch(url, { mode: 'cors' });
-          const html = await res.text();
-          const doc = new DOMParser().parseFromString(html, 'text/html');
-          const og = sel => doc.querySelector(`meta[property="${sel}"]`)?.content || '';
+      // Auto-fill basic info via OG tags (price may be missing behind auth)
+      $('#itemsContainer').on('click','.fetchData',async function(){
+        const $wrap=$(this).closest('[data-item]');
+        const url=$wrap.find('.productLink').val();
+        if(!url) return;
+        try{
+          const res=await fetch(`https://r.jina.ai/http://textise dot iitty/?url=${encodeURIComponent(url)}`);
+          const txt=await res.text();
+          const doc=new DOMParser().parseFromString(txt,'text/html');
+          const og=s=>doc.querySelector(`meta[property="${s}"]`)?.content||'';
           $wrap.find('.productName').val(og('og:title'));
           $wrap.find('.productImage').val(og('og:image'));
-          const price = og('product:price:amount');
-          if (price) $wrap.find('.productPrice').val(`$${price}`);
           refresh();
-        } catch (e) {
-          console.error(e);
-        }
+        }catch(e){console.warn('Auto-fill blocked by CORS');}
       });
-
-      $('#builder').on('input change', 'input', refresh);
+      $('#builder').on('input change','input',refresh);
       addItem();
 
-      function starSrc(r) {
-        const val = Math.round((r || 0) * 2) / 2;
-        return `/ux/img/stars/rating-${val.toString().replace('.', '_')}.gif`;
+      function ratingHTML(r){
+        r=Math.max(0,Math.min(5,parseFloat(r)||0));
+        const full=Math.floor(r);
+        const half=r%1>=0.5;
+        let html='';
+        for(let i=0;i<full;i++) html+='<span>★</span>';
+        if(half) html+='<span>☆</span>';
+        return `<div class="rating inline-block">${html}</div>`;
       }
-
-      function buildItem(d) {
-        return `<div class="product-card_content product-card_slider">
+      function buildItem(d,idx){
+        return `<div class="product-card_content product-card_slider relative" data-idx="${idx}">
+          <span class="badge">${idx+1}</span>
           <div class="product-card_content_images p-0 mb-3"><a href="${d.link}"><img src="${d.image}" alt="${d.name}" /></a></div>
           <div class="product-card_content_description"><div>
-            <p class="product-card_brand"><a href="${d.link}">${d.brand}</a></p>
+            <p class="product-card_brand font-semibold"><a href="${d.link}">${d.brand}</a></p>
             <div class="product-card_name">${d.name}</div>
             <div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> ${d.msrp} </span></div>
             <div class="product-card_price_regular">NEX Price <span> ${d.price} </span></div>
           </div>
-          ${d.showReviews ? `<div><div class="product-card_reviews mt-2 mb-2 flex items-center"><img alt="Product Rating" class="ratingsStars" src="${starSrc(d.rating)}" /><span class="ml-2"> (${d.reviews}) </span></div></div>` : ''}
+          ${d.showReviews?`<div class="mt-2 mb-2 flex items-center gap-1">${ratingHTML(d.rating)}<span>(${d.reviews})</span></div>`:''}
           </div></div>`;
       }
-
-      function refresh() {
-        const showReviews = $('#showReviews').is(':checked');
-        const items = [];
-        $('#itemsContainer [data-item]').each(function () {
-          const $el = $(this);
+      function refresh(){
+        const showReviews=$('#showReviews').is(':checked');
+        const items=[];
+        $('#itemsContainer [data-item]').each(function(){
+          const $el=$(this);
           items.push({
-            name: $el.find('.productName').val(),
-            brand: $el.find('.productBrand').val(),
-            link: $el.find('.productLink').val(),
-            image: $el.find('.productImage').val(),
-            msrp: $el.find('.productMsrp').val(),
-            price: $el.find('.productPrice').val(),
-            rating: parseFloat($el.find('.productRating').val()) || 0,
-            reviews: $el.find('.productReviews').val() || 0,
+            name:$el.find('.productName').val(),
+            brand:$el.find('.productBrand').val(),
+            link:$el.find('.productLink').val(),
+            image:$el.find('.productImage').val(),
+            msrp:$el.find('.productMsrp').val(),
+            price:$el.find('.productPrice').val(),
+            rating:parseFloat($el.find('.productRating').val())||0,
+            reviews:$el.find('.productReviews').val()||0,
             showReviews
           });
         });
-        const inner = items.map(buildItem).join('');
-        const html = `<div class="sg-content col-12 row no-gutters"><div class="sg-content-item col-12 row align-items-center mx-0 my-4"><div class="col-12 bold mb-4" style="font-size: 18px;">${$('#carouselTitle').val()}</div><div class="owl-carousel recently-viewed-carousel owl-theme">${inner}</div></div></div><script>$(document).ready(function(){const c=$('.recently-viewed-carousel');const l=c[0].children.length;c.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,navText:['<span class=\'fas fa-chevron-left fa-2x\'></span>','<span class=\'fas fa-chevron-right fa-2x\'></span>'],dots:true,responsive:{0:{items:3,loop:true},361:{items:3,loop:l>1},571:{items:3,loop:l>2},721:{items:4,loop:l>3},857:{items:5,loop:l>4},993:{items:5,loop:l>5}}});});<\/script>`;
+        const inner=items.map((i,idx)=>buildItem(i,idx)).join('');
+        const html=`<div class="sg-content col-12 row no-gutters"><div class="sg-content-item col-12 row align-items-center mx-0 my-4"><div class="col-12 bold mb-4" style="font-size: 18px;">${$('#carouselTitle').val()}</div><div class="owl-carousel recently-viewed-carousel owl-theme">${inner}</div></div></div><script>$(document).ready(function(){const c=$('.recently-viewed-carousel');const l=c[0].children.length;c.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,navText:['<span class=\'fas fa-chevron-left fa-2x\'></span>','<span class=\'fas fa-chevron-right fa-2x\'></span>'],dots:true,responsive:{0:{items:3,loop:true},361:{items:3,loop:l>1},571:{items:3,loop:l>2},721:{items:4,loop:l>3},857:{items:5,loop:l>4},993:{items:5,loop:l>5}}});});<\/script>`;
         $('#output').val(html);
-        const $p = $('#previewCarousel');
+        const $p=$('#previewCarousel');
         $p.trigger('destroy.owl.carousel');
         $p.html(inner);
-        $p.owlCarousel({ loop: false, rewind: true, margin: 10, nav: true, slideBy: 4, dots: true, items: 4 });
+        $p.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,dots:true,items:4});
+        // highlight last added
+        if(lastAddedIndex>-1){
+          $p.find(`[data-idx="${lastAddedIndex}"]`).addClass('ring-4 ring-gold');
+        }
       }
-
-      $(document).on('click', '#copyCode', function () {
-        navigator.clipboard.writeText($('#output').val());
-      });
-
-      refresh();
+      $(document).on('click','#copyCode',function(){navigator.clipboard.writeText($('#output').val());});
     });
   </script>
 </body>
