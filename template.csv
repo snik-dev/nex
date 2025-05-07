@@ -1,0 +1,2 @@
+link,name,brand,image,msrp,price,rating,reviews,badge
+https://www.example.com/product/123,Optional Product Name,Brand,https://www.example.com/image.jpg,29.99,22.99,4.5,87,"new  # options: clearance, last-chance, new, exclusive, or leave blank"
