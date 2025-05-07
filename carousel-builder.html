@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Carousel Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-8 flex flex-col gap-8">
+  <h1 class="text-3xl font-semibold">Carousel Generator</h1>
+
+  <div class="grid lg:grid-cols-2 gap-8 w-full">
+    <div>
+      <form id="builder" class="space-y-6">
+        <div>
+          <label class="block font-medium mb-1">Carousel Title</label>
+          <input id="carouselTitle" type="text" class="w-full border rounded p-2" />
+        </div>
+        <div class="flex items-center gap-4">
+          <label class="font-medium">Template</label>
+          <select id="template" class="border p-2 rounded">
+            <option value="v1">Version 1</option>
+            <option value="v2">Version 2</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <input id="showReviews" type="checkbox" class="h-4 w-4" checked />
+          <label for="showReviews">Include review count</label>
+        </div>
+        <div id="itemsContainer" class="space-y-6"></div>
+        <button id="addItem" type="button" class="px-4 py-2 bg-blue-600 text-white rounded">Add Item</button>
+      </form>
+    </div>
+
+    <div class="flex flex-col gap-6">
+      <div>
+        <h2 class="text-xl font-semibold mb-4">Live Preview</h2>
+        <div class="owl-carousel" id="previewCarousel"></div>
+      </div>
+      <div>
+        <h2 class="text-xl font-semibold mb-2">Generated HTML</h2>
+        <textarea id="output" class="w-full h-64 border p-2 font-mono text-xs"></textarea>
+        <button id="copyCode" class="mt-2 px-4 py-2 bg-green-600 text-white rounded">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <template id="itemTemplate">
+    <div class="border p-4 rounded space-y-3 bg-white shadow" data-item>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <input type="text" placeholder="Product Name" class="productName border rounded p-2 col-span-2 md:col-span-3" />
+        <input type="text" placeholder="Brand" class="productBrand border rounded p-2" />
+        <input type="url" placeholder="Product Link URL" class="productLink border rounded p-2 col-span-2" />
+        <input type="url" placeholder="Image URL" class="productImage border rounded p-2 col-span-2 md:col-span-3" />
+        <input type="text" placeholder="MSRP e.g. $28.00" class="productMsrp border rounded p-2" />
+        <input type="text" placeholder="Price e.g. $22.99" class="productPrice border rounded p-2" />
+        <input type="number" step="0.5" min="0" max="5" placeholder="Rating" class="productRating border rounded p-2" />
+        <input type="number" placeholder="Reviews" class="productReviews border rounded p-2" />
+      </div>
+      <button type="button" class="removeItem px-3 py-1 bg-red-500 text-white rounded">Remove</button>
+    </div>
+  </template>
+
+  <script>
+    $(function () {
+      function addItem() {
+        const tmpl = document.getElementById('itemTemplate').content.cloneNode(true);
+        $('#itemsContainer').append(tmpl);
+      }
+      $('#addItem').on('click', addItem);
+      $('#itemsContainer').on('click', '.removeItem', function () {
+        $(this).closest('[data-item]').remove();
+        refresh();
+      });
+      $('#builder').on('input change', 'input, select', refresh);
+      addItem();
+
+      function starSrc(r) {
+        const val = Math.round((r || 0) * 2) / 2;
+        return '/ux/img/stars/rating-' + val.toString().replace('.', '_') + '.gif';
+      }
+
+      function buildItem(d, t) {
+        if (t === 'v1') {
+          return '<div class="product-card_content product-card_slider">' +
+            '<div class="product-card_content_images p-0 mb-3"><a href="' + d.link + '"><img src="' + d.image + '" /></a></div>' +
+            '<div class="product-card_content_description"><div>' +
+            '<p class="product-card_brand"><a href="' + d.link + '">' + d.brand + '</a></p>' +
+            '<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> ' + d.msrp + ' </span></div>' +
+            '<div class="product-card_price_regular">NEX Price <span> ' + d.price + ' </span></div>' +
+            '</div>' +
+            (d.showReviews ? '<div><div class="product-card_reviews mt-2 mb-2 d-flex align-items-center"><img alt="Product Rating" class="ratingsStars" src="' + starSrc(d.rating) + '" /> <span class="ml-2"> (' + d.reviews + ') </span></div></div>' : '') +
+            '</div></div>';
+        }
+        return '<div class="product-card_content product-card_slider">' +
+          '<div class="product-card_content_images p-0 mb-3"><a href="' + d.link + '"><img src="' + d.image + '" /></a></div>' +
+          '<div class="product-card_content_description"><div>' +
+          '<p class="product-card_brand">' + d.brand + '</p>' +
+          '<div class="product-card_name">' + d.name + '</div>' +
+          '<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> ' + d.msrp + ' </span></div>' +
+          '<div class="product-card_price_regular">NEX Price <span> ' + d.price + ' </span></div>' +
+          '</div>' +
+          (d.showReviews ? '<div><div class="product-card_reviews mt-2 mb-2 d-flex align-items-center"><img alt="Product Rating" class="ratingsStars" src="' + starSrc(d.rating) + '" /> <span class="ml-2"> (' + d.reviews + ') </span></div></div>' : '') +
+          '</div></div>';
+      }
+
+      function refresh() {
+        const t = $('#template').val();
+        const showReviews = $('#showReviews').is(':checked');
+        const items = [];
+        $('#itemsContainer [data-item]').each(function () {
+          const $el = $(this);
+          items.push({
+            name: $el.find('.productName').val(),
+            brand: $el.find('.productBrand').val(),
+            link: $el.find('.productLink').val(),
+            image: $el.find('.productImage').val(),
+            msrp: $el.find('.productMsrp').val(),
+            price: $el.find('.productPrice').val(),
+            rating: parseFloat($el.find('.productRating').val()) || 0,
+            reviews: $el.find('.productReviews').val() || 0,
+            showReviews
+          });
+        });
+        const inner = items.map(i => buildItem(i, t)).join('');
+        const html = '<div class="sg-content col-12 row no-gutters">' +
+          '<div class="sg-content-item col-12 row align-items-center mx-0 my-4">' +
+          '<div class="col-12 bold mb-4" style="font-size: 18px;">' + $('#carouselTitle').val() + '</div>' +
+          '<div class="owl-carousel recently-viewed-carousel owl-theme">' + inner + '</div>' +
+          '</div></div>' +
+          '<script>$(document).ready(function(){const c=$(".recently-viewed-carousel");const l=c[0].children.length;c.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,navText:["<span class=\"fas fa-chevron-left fa-2x\"></span>","<span class=\"fas fa-chevron-right fa-2x\"></span>"],dots:true,responsive:{0:{items:3,loop:true},361:{items:3,loop:l>1},571:{items:3,loop:l>2},721:{items:4,loop:l>3},857:{items:5,loop:l>4},993:{items:5,loop:l>5}}});});<\/script>';
+        $('#output').val(html);
+        const $p = $('#previewCarousel');
+        $p.trigger('destroy.owl.carousel');
+        $p.html(inner);
+        $p.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,dots:true,items:4});
+      }
+
+      $(document).on('click', '#copyCode', function () {
+        navigator.clipboard.writeText($('#output').val());
+      });
+
+      refresh();
+    });
+  </script>
+</body>
+</html>
