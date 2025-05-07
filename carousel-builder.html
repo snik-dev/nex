@@ -8,7 +8,7 @@
 <script>tailwind.config={theme:{extend:{colors:{navy:'#002366',gold:'#ffc72c',danger:'#b91c1c'}}}}</script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-<style>.badge{position:absolute;top:6px;left:6px;background:#ffc72c;color:#002366;font-weight:700;font-size:.75rem;padding:2px 6px;border-radius:9999px}.rating span{color:#ffc72c;font-size:.875rem}.placeholder{background:#e2e8f0;display:flex;align-items:center;justify-content:center;height:200px;font-size:.875rem;color:#6b7280}.promo-badge{position:absolute;top:6px;right:6px;background:#b91c1c;color:#fff;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px}</style>
+<style>.badge{position:absolute;top:6px;left:6px;background:#ffc72c;color:#002366;font-weight:700;font-size:.75rem;padding:2px 6px;border-radius:9999px}.rating span{color:#ffc72c;font-size:.875rem}.placeholder{background:#e2e8f0;display:flex;align-items:center;justify-content:center;height:200px;font-size:.875rem;color:#6b7280}.promo-badge{position:absolute;top:6px;right:6px;background:#002366;color:#fff;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px}</style>
 </head>
 <body class="bg-gray-100 min-h-screen p-6 flex flex-col gap-6">
 <header class="bg-navy text-white p-4 rounded-lg shadow mb-4"><h1 class="text-3xl font-semibold">MNE.com Carousel Generator</h1></header>
@@ -17,26 +17,25 @@
 <form id="builder" class="space-y-4">
 <div><label class="block font-medium mb-1">Carousel Title</label><input id="carouselTitle" type="text" class="w-full border rounded p-2" /></div>
 <div class="flex items-center gap-2"><input id="showReviews" type="checkbox" class="h-4 w-4" checked /><label for="showReviews">Include review count</label></div>
-<div><label class="block font-medium mb-1">Template</label><select id="templateSelect" class="border rounded p-2 w-full"><option value="standard">Standard</option><option value="promo">Promo</option><option value="minimal">Minimal</option></select></div>
+<div><label class="block font-medium mb-1">Template Type</label><select id="templateSelect" class="border rounded p-2 w-full"><option value="standard">Standard – Brand, Name, MSRP, Price</option><option value="promo">Promo – Name, Price, Badge</option><option value="minimal">Minimal – Image & Name</option></select></div>
 <div id="itemsContainer" class="space-y-6"></div>
 <button id="addItem" type="button" class="px-4 py-2 bg-gold text-navy rounded shadow w-full">Add Item (0/10)</button>
 <hr class="my-4" />
-<h2 class="font-semibold text-lg mb-2">Import Existing HTML</h2>
-<textarea id="importHtml" class="w-full h-32 border p-2 text-xs font-mono"></textarea>
-<button id="importBtn" type="button" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">Import</button>
-<hr class="my-4" />
 <h2 class="font-semibold text-lg mb-2">Bulk CSV Upload</h2>
 <input type="file" id="csvFile" accept=".csv" class="mb-2" />
-<a href="https://snik-dev.github.io/nex/template.csv" class="text-navy underline text-sm" target="_blank">Download CSV template</a>
+<br><a href="https://snik-dev.github.io/nex/template.csv" class="text-navy underline text-sm" target="_blank">Download CSV template</a>
 </form>
 </div>
 <div class="lg:col-span-2">
 <h2 class="text-xl font-semibold mb-2">Live Preview <span class="text-sm text-gray-600">(drag to reorder)</span></h2>
-<div id="previewArea" class="flex flex-wrap gap-4 bg-white border rounded p-4 min-h-[260px]"></div>
+<div id="previewArea" class="flex flex-col gap-4 bg-white border rounded p-4 min-h-[260px]"></div>
 <div id="a11yReport" class="mt-4 text-danger text-sm"></div>
 </div>
 </div>
-<div class="mt-6"><h2 class="text-xl font-semibold mb-2">Generated / Injected HTML</h2><textarea id="output" class="w-full h-64 border p-2 font-mono text-xs"></textarea><button id="copyCode" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">Copy</button></div>
+<div class="grid lg:grid-cols-2 gap-6 mt-6">
+<div><h2 class="text-xl font-semibold mb-2">Generated HTML</h2><textarea id="output" class="w-full h-64 border p-2 font-mono text-xs"></textarea><button id="copyCode" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">Copy</button></div>
+<div><h2 class="text-xl font-semibold mb-2">HTML Input (Import)</h2><textarea id="importHtml" class="w-full h-64 border p-2 font-mono text-xs"></textarea><button id="importBtn" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">Import</button></div>
+</div>
 <template id="itemTemplate">
 <div class="border p-4 rounded space-y-3 bg-white shadow" data-item>
 <div class="flex justify-between items-center"><span class="font-bold itemIndex">#</span><button type="button" class="removeItem px-2 py-1 bg-red-500 text-white rounded">Remove</button></div>
@@ -49,7 +48,8 @@
 <input type="text" placeholder="Price" class="productPrice border rounded p-2" />
 <input type="number" step="0.5" min="0" max="5" placeholder="Rating" class="productRating border rounded p-2" />
 <input type="number" placeholder="Reviews" class="productReviews border rounded p-2" />
-<select class="productBadge border rounded p-2 col-span-2 md:col-span-3"><option value="">Promo Badge</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option></select>
+<label class="col-span-2 md:col-span-3 text-sm font-medium">Promo Badge (optional)</label>
+<select class="productBadge border rounded p-2 col-span-2 md:col-span-3"><option value="">None</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option></select>
 </div>
 </div>
 </template>
@@ -63,10 +63,4 @@ function ratingHTML(r){r=parseFloat(r)||0;const f=Math.floor(r),h=r%1>=.5;let t=
 function badgeHTML(t){if(!t)return '';const m={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'};return `<span class="promo-badge" data-type="${t}">${m[t]||''}</span>`}
 function buildCard(d,i,tpl,sr){const img=d.image?`<img src="${d.image}" alt="${d.name||'product'}"/>`:placeholderImg;const name=d.name?`<div class="product-card_name">${d.name}</div>`:'';const brand=d.brand?`<p class="product-card_brand font-semibold"><a href="${d.link}">${d.brand}</a></p>`:'';const msrp=d.msrp?`<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> ${d.msrp} </span></div>`:'';const price=d.price?`<div class="product-card_price_regular">NEX Price <span> ${d.price} </span></div>`:'';let body='';if(tpl==='minimal'){body=name}else if(tpl==='promo'){body=`${name}${price}`}else{body=`${brand}${name}${msrp}${price}`}const rev=sr?`<div class="mt-2 flex items-center gap-1">${ratingHTML(d.rating)}<span>(${d.reviews})</span></div>`:'';return `<div class="relative w-40" data-idx="${i}"><div class="badge">${i+1}</div>${badgeHTML(d.badge)}<a href="${d.link}">${img}</a><div class="text-sm mt-2">${body}${rev}</div></div>`}
 function accessibility(){let issues=[];$('#previewArea img').each(function(){if(!$(this).attr('alt'))issues.push('Image missing alt text')});$('#a11yReport').text(issues.join(', '))}
-function buildOutput(arr,tpl,sr){const inner=arr.map((d,i)=>{const promo=badgeHTML(d.badge);const img=d.image?`<img src="${d.image}" alt="${d.name||'product'}"/>`:placeholderImg;const name=d.name?`<div class="product-card_name">${d.name}</div>`:'';const brand=d.brand?`<p class="product-card_brand"><a href="${d.link}">${d.brand}</a></p>`:'';const msrp=d.msrp?`<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> ${d.msrp} </span></div>`:'';const price=d.price?`<div class="product-card_price_regular">NEX Price <span> ${d.price} </span></div>`:'';let b='';if(tpl==='minimal'){b=name}else if(tpl==='promo'){b=`${name}${price}`}else{b=`${brand}${name}${msrp}${price}`}const rv=sr?`<div class="product-card_reviews mt-2 mb-2 d-flex align-items-center">${ratingHTML(d.rating)} <span class="ml-1">(${d.reviews})</span></div>`:'';return `<div class="product-card_content product-card_slider relative"><span class="badge">${i+1}</span>${promo}<div class="product-card_content_images p-0 mb-3"><a href="${d.link}">${img}</a></div><div class="product-card_content_description">${b}${rv}</div></div>`}).join('');const html=`<div class="sg-content col-12 row no-gutters"><div class="sg-content-item col-12 row align-items-center mx-0 my-4"><div class="col-12 bold mb-4" style="font-size:18px;">${$('#carouselTitle').val()}</div><div class="owl-carousel recently-viewed-carousel owl-theme">${inner}</div></div></div>`;$('#output').val(html)}
-function refresh(){const tpl=$('#templateSelect').val();const sr=$('#showReviews').is(':checked');const arr=[];$('#itemsContainer [data-item]').each(function(){const $el=$(this);arr.push({link:$el.find('.productLink').val(),name:$el.find('.productName').val(),brand:$el.find('.productBrand').val(),image:$el.find('.productImage').val(),msrp:$el.find('.productMsrp').val(),price:$el.find('.productPrice').val(),rating:$el.find('.productRating').val(),reviews:$el.find('.productReviews').val(),badge:$el.find('.productBadge').val()})});const cards=arr.map((d,i)=>buildCard(d,i,tpl,sr)).join('');$('#previewArea').html(cards);accessibility();buildOutput(arr,tpl,sr)}
-const sortable=new Sortable(document.getElementById('previewArea'),{animation:150,onEnd:function(e){const o=e.oldIndex,n=e.newIndex,$it=$('#itemsContainer [data-item]');const $moved=$it.eq(o);if(n===0){$('#itemsContainer').prepend($moved)}else{$it.eq(n).before($moved)}updateCounts();refresh()}});
-$(document).on('click','#copyCode',()=>navigator.clipboard.writeText($('#output').val()));addItem()});
-</script>
-</body>
-</html>
+function buildOutput(arr,tpl,sr){const inner=arr.map((d,i)=>{const promo=badgeHTML
