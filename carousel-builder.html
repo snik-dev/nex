@@ -1,248 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MNE.com Carousel Generator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            navy: '#002366',
-            navyLight: '#0047b3',
-            gold: '#ffc72c'
-          }
-        }
-      }
-    }
-  </script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-  <style>
-    .owl-carousel img{width:100%;height:auto}
-    .badge{position:absolute;top:4px;left:4px;background:#ffc72c;color:#002366;font-weight:700;font-size:0.75rem;padding:2px 6px;border-radius:9999px}
-    .rating span{color:#ffc72c;font-size:0.875rem}
-    .placeholder{background:#e2e8f0;display:flex;align-items:center;justify-content:center;height:200px;font-size:0.875rem;color:#6b7280}
-  </style>
+<meta charset="UTF-8">
+<title>MNE.com Carousel Generator</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{navy:'#002366',gold:'#ffc72c',danger:'#b91c1c'}}}}</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<style>.badge{position:absolute;top:6px;left:6px;background:#ffc72c;color:#002366;font-weight:700;font-size:.75rem;padding:2px 6px;border-radius:9999px}.rating span{color:#ffc72c;font-size:.875rem}.placeholder{background:#e2e8f0;display:flex;align-items:center;justify-content:center;height:200px;font-size:.875rem;color:#6b7280}.promo-badge{position:absolute;top:6px;right:6px;background:#b91c1c;color:#fff;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px}</style>
 </head>
-<body class="bg-gray-100 min-h-screen p-8 flex flex-col gap-8">
-  <header class="bg-navy text-white p-4 rounded-lg shadow">
-    <h1 class="text-3xl font-semibold">MNE.com Carousel Generator</h1>
-  </header>
-
-  <div class="grid lg:grid-cols-3 gap-8 w-full">
-    <!-- Builder Column -->
-    <div class="lg:col-span-1">
-      <form id="builder" class="space-y-6">
-        <div>
-          <label class="block font-medium mb-1">Carousel Title</label>
-          <input id="carouselTitle" type="text" class="w-full border rounded p-2" />
-        </div>
-        <div class="flex items-center gap-2">
-          <input id="showReviews" type="checkbox" class="h-4 w-4" checked />
-          <label for="showReviews">Include review count</label>
-        </div>
-        <div id="itemsContainer" class="space-y-6"></div>
-        <button id="addItem" type="button" class="px-4 py-2 bg-gold text-navy rounded shadow">Add Item (0/10)</button>
-        <hr class="my-6"/>
-        <h2 class="font-semibold text-lg mb-2">Import Existing HTML</h2>
-        <textarea id="importHtml" class="w-full h-40 border p-2 text-xs font-mono" placeholder="Paste previously generated HTML here"></textarea>
-        <button id="importBtn" type="button" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">Import</button>
-      </form>
-    </div>
-
-    <!-- Preview Column -->
-    <div class="lg:col-span-1">
-      <h2 class="text-xl font-semibold mb-4">Live Preview (drag to reorder)</h2>
-      <div id="previewWrapper" class="border rounded p-2 bg-white shadow">
-        <div class="owl-carousel" id="previewCarousel"></div>
-      </div>
-    </div>
-
-    <!-- Output Column -->
-    <div class="lg:col-span-1 flex flex-col">
-      <h2 class="text-xl font-semibold mb-2">Generated HTML</h2>
-      <textarea id="output" class="w-full flex-grow border p-2 font-mono text-xs"></textarea>
-      <button id="copyCode" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow self-start">Copy</button>
-    </div>
-  </div>
-
-  <!-- Item Template -->
-  <template id="itemTemplate">
-    <div class="border p-4 rounded space-y-3 bg-white shadow" data-item>
-      <div class="flex justify-between items-center">
-        <span class="font-bold itemIndex">#</span>
-        <button type="button" class="removeItem px-2 py-1 bg-red-500 text-white rounded">Remove</button>
-      </div>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-        <input type="url" placeholder="Product Link URL" class="productLink border rounded p-2 col-span-2 md:col-span-3" />
-        <input type="text" placeholder="Product Name (optional)" class="productName border rounded p-2 col-span-2 md:col-span-3" />
-        <input type="text" placeholder="Brand" class="productBrand border rounded p-2" />
-        <input type="url" placeholder="Image URL" class="productImage border rounded p-2 col-span-2" />
-        <input type="text" placeholder="MSRP" class="productMsrp border rounded p-2" />
-        <input type="text" placeholder="Price" class="productPrice border rounded p-2" />
-        <input type="number" step="0.5" min="0" max="5" placeholder="Rating" class="productRating border rounded p-2" />
-        <input type="number" placeholder="Reviews" class="productReviews border rounded p-2" />
-      </div>
-    </div>
-  </template>
-
-  <script>
-    $(function(){
-      const placeholderImg='<div class="placeholder">No Image Added</div>';
-      let lastAddedIndex=-1;
-
-      function updateIndexes(){
-        $('#itemsContainer [data-item]').each(function(i){
-          $(this).find('.itemIndex').text(i+1);
-        });
-      }
-      function updateAddBtn(){
-        const count=$('#itemsContainer [data-item]').length;
-        const $btn=$('#addItem');
-        $btn.text(`Add Item (${count}/10)`);
-        $btn.prop('disabled',count>=10);
-        $btn.toggleClass('opacity-50 cursor-not-allowed',count>=10);
-      }
-      function addItem(data={}){
-        const tmpl=document.getElementById('itemTemplate').content.cloneNode(true);
-        $('#itemsContainer').append(tmpl);
-        const $item=$('#itemsContainer [data-item]').last();
-        if(Object.keys(data).length){
-          $item.find('.productLink').val(data.link||'');
-          $item.find('.productName').val(data.name||'');
-          $item.find('.productBrand').val(data.brand||'');
-          $item.find('.productImage').val(data.image||'');
-          $item.find('.productMsrp').val(data.msrp||'');
-          $item.find('.productPrice').val(data.price||'');
-          $item.find('.productRating').val(data.rating||'');
-          $item.find('.productReviews').val(data.reviews||'');
-        }
-        lastAddedIndex=$('#itemsContainer [data-item]').length-1;
-        updateIndexes();
-        updateAddBtn();
-        refresh();
-      }
-      $('#addItem').on('click',()=>addItem());
-
-      $('#itemsContainer').on('click','.removeItem',function(){
-        $(this).closest('[data-item]').remove();
-        updateIndexes();
-        updateAddBtn();
-        refresh();
-      });
-
-      $('#builder').on('input change','input, textarea',refresh);
-
-      // Import existing HTML blurb
-      $('#importBtn').on('click',function(){
-        const html=$('#importHtml').val();
-        if(!html.trim()) return;
-        $('#itemsContainer').empty();
-        const doc=new DOMParser().parseFromString(html,'text/html');
-        const title=doc.querySelector('.sg-content-item > .col-12.bold');
-        if(title) $('#carouselTitle').val(title.textContent.trim());
-        const cards=doc.querySelectorAll('.product-card_content');
-        cards.forEach(card=>{
-          const link=card.querySelector('a')?.href||'';
-          const image=card.querySelector('img')?.src||'';
-          const brand=card.querySelector('.product-card_brand')?.textContent.trim()||'';
-          const name=card.querySelector('.product-card_name')?.textContent.trim()||'';
-          const msrp=card.querySelector('.product-card_price_msrp_strike')?.textContent.trim()||'';
-          const price=card.querySelector('.product-card_price_regular span')?.textContent.trim()||'';
-          const reviewsText=card.querySelector('.product-card_reviews span')?.textContent.match(/\d+/)?.[0]||'';
-          const ratingEl=card.querySelector('.ratingsStars');
-          let rating='';
-          if(ratingEl){
-            const alt=parseFloat(ratingEl.alt)||'';
-            rating=alt;
-          }
-          addItem({link,image,brand,name,msrp,price,reviews:reviewsText,rating});
-        });
-      });
-
-      function ratingHTML(r){
-        r=Math.max(0,Math.min(5,parseFloat(r)||0));
-        const full=Math.floor(r);
-        const half=r%1>=0.5;
-        let html='';
-        for(let i=0;i<full;i++) html+='<span>★</span>';
-        if(half) html+='<span>☆</span>';
-        return `<div class="rating inline-block">${html}</div>`;
-      }
-      function buildItem(d,idx){
-        const imgPart=d.image?`<img src="${d.image}" alt="${d.name||'product'}"/>`:placeholderImg;
-        const nameHTML=d.name?`<div class="product-card_name">${d.name}</div>`:'';
-        return `<div class="product-card_content product-card_slider relative" data-idx="${idx}">
-          <span class="badge">${idx+1}</span>
-          <div class="product-card_content_images p-0 mb-3"><a href="${d.link}">${imgPart}</a></div>
-          <div class="product-card_content_description"><div>
-            <p class="product-card_brand font-semibold"><a href="${d.link}">${d.brand}</a></p>
-            ${nameHTML}
-            <div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> ${d.msrp} </span></div>
-            <div class="product-card_price_regular">NEX Price <span> ${d.price} </span></div>
-          </div>
-          ${d.showReviews?`<div class="mt-2 mb-2 flex items-center gap-1">${ratingHTML(d.rating)}<span>(${d.reviews})</span></div>`:''}
-          </div></div>`;
-      }
-
-      function refresh(){
-        const showReviews=$('#showReviews').is(':checked');
-        const items=[];
-        $('#itemsContainer [data-item]').each(function(){
-          const $el=$(this);
-          items.push({
-            name:$el.find('.productName').val(),
-            brand:$el.find('.productBrand').val(),
-            link:$el.find('.productLink').val(),
-            image:$el.find('.productImage').val(),
-            msrp:$el.find('.productMsrp').val(),
-            price:$el.find('.productPrice').val(),
-            rating:parseFloat($el.find('.productRating').val())||0,
-            reviews:$el.find('.productReviews').val()||0,
-            showReviews
-          });
-        });
-        const inner=items.map((i,idx)=>buildItem(i,idx)).join('');
-        const html=`<div class="sg-content col-12 row no-gutters"><div class="sg-content-item col-12 row align-items-center mx-0 my-4"><div class="col-12 bold mb-4" style="font-size: 18px;">${$('#carouselTitle').val()}</div><div class="owl-carousel recently-viewed-carousel owl-theme">${inner}</div></div></div><script>$(document).ready(function(){const c=$('.recently-viewed-carousel');const l=c[0].children.length;c.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,navText:['<span class=\'fas fa-chevron-left fa-2x\'></span>','<span class=\'fas fa-chevron-right fa-2x\'></span>'],dots:true,responsive:{0:{items:3,loop:true},361:{items:3,loop:l>1},571:{items:3,loop:l>2},721:{items:4,loop:l>3},857:{items:5,loop:l>4},993:{items:5,loop:l>5}}});});<\/script>`;
-        $('#output').val(html);
-        const $p=$('#previewCarousel');
-        $p.trigger('destroy.owl.carousel');
-        $p.html(inner);
-        $p.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,dots:true,items:4});
-        if(lastAddedIndex>-1){
-          $p.find(`[data-idx="${lastAddedIndex}"]`).addClass('ring-4 ring-gold');
-        }
-      }
-
-      // Make preview draggable & sync back to builder items
-      const sortPreview=new Sortable(document.getElementById('previewCarousel'),{
-        animation:150,
-        onEnd:function(evt){
-          const oldIndex=evt.oldIndex;
-          const newIndex=evt.newIndex;
-          const $items=$('#itemsContainer [data-item]');
-          if(newIndex>=$items.length) return;
-          const $moved=$items.eq(oldIndex);
-          if(newIndex===0){
-            $('#itemsContainer').prepend($moved);
-          }else{
-            $items.eq(newIndex).before($moved);
-          }
-          updateIndexes();
-          refresh();
-        }
-      });
-
-      $(document).on('click','#copyCode',function(){navigator.clipboard.writeText($('#output').val());});
-
-      addItem();
-    });
-  </script>
+<body class="bg-gray-100 min-h-screen p-6 flex flex-col gap-6">
+<header class="bg-navy text-white p-4 rounded-lg shadow mb-4"><h1 class="text-3xl font-semibold">MNE.com Carousel Generator</h1></header>
+<div class="grid lg:grid-cols-3 gap-6 w-full">
+<div class="lg:col-span-1 space-y-6">
+<form id="builder" class="space-y-4">
+<div><label class="block font-medium mb-1">Carousel Title</label><input id="carouselTitle" type="text" class="w-full border rounded p-2" /></div>
+<div class="flex items-center gap-2"><input id="showReviews" type="checkbox" class="h-4 w-4" checked /><label for="showReviews">Include review count</label></div>
+<div><label class="block font-medium mb-1">Template</label><select id="templateSelect" class="border rounded p-2 w-full"><option value="standard">Standard</option><option value="promo">Promo</option><option value="minimal">Minimal</option></select></div>
+<div id="itemsContainer" class="space-y-6"></div>
+<button id="addItem" type="button" class="px-4 py-2 bg-gold text-navy rounded shadow w-full">Add Item (0/10)</button>
+<hr class="my-4" />
+<h2 class="font-semibold text-lg mb-2">Import Existing HTML</h2>
+<textarea id="importHtml" class="w-full h-32 border p-2 text-xs font-mono"></textarea>
+<button id="importBtn" type="button" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">Import</button>
+<hr class="my-4" />
+<h2 class="font-semibold text-lg mb-2">Bulk CSV Upload</h2>
+<input type="file" id="csvFile" accept=".csv" class="mb-2" />
+<a href="https://snik-dev.github.io/nex/template.csv" class="text-navy underline text-sm" target="_blank">Download CSV template</a>
+</form>
+</div>
+<div class="lg:col-span-2">
+<h2 class="text-xl font-semibold mb-2">Live Preview <span class="text-sm text-gray-600">(drag to reorder)</span></h2>
+<div id="previewArea" class="flex flex-wrap gap-4 bg-white border rounded p-4 min-h-[260px]"></div>
+<div id="a11yReport" class="mt-4 text-danger text-sm"></div>
+</div>
+</div>
+<div class="mt-6"><h2 class="text-xl font-semibold mb-2">Generated / Injected HTML</h2><textarea id="output" class="w-full h-64 border p-2 font-mono text-xs"></textarea><button id="copyCode" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">Copy</button></div>
+<template id="itemTemplate">
+<div class="border p-4 rounded space-y-3 bg-white shadow" data-item>
+<div class="flex justify-between items-center"><span class="font-bold itemIndex">#</span><button type="button" class="removeItem px-2 py-1 bg-red-500 text-white rounded">Remove</button></div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+<input type="url" placeholder="Product Link URL" class="productLink border rounded p-2 col-span-2 md:col-span-3" />
+<input type="text" placeholder="Product Name" class="productName border rounded p-2 col-span-2 md:col-span-3" />
+<input type="text" placeholder="Brand" class="productBrand border rounded p-2" />
+<input type="url" placeholder="Image URL" class="productImage border rounded p-2 col-span-2" />
+<input type="text" placeholder="MSRP" class="productMsrp border rounded p-2" />
+<input type="text" placeholder="Price" class="productPrice border rounded p-2" />
+<input type="number" step="0.5" min="0" max="5" placeholder="Rating" class="productRating border rounded p-2" />
+<input type="number" placeholder="Reviews" class="productReviews border rounded p-2" />
+<select class="productBadge border rounded p-2 col-span-2 md:col-span-3"><option value="">Promo Badge</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option></select>
+</div>
+</div>
+</template>
+<script>
+$(function(){const maxItems=10,placeholderImg='<div class="placeholder">No Image Added</div>';function updateCounts(){const c=$('#itemsContainer [data-item]').length;$('#addItem').text(`Add Item (${c}/${maxItems})`).prop('disabled',c>=maxItems).toggleClass('opacity-50 cursor-not-allowed',c>=maxItems);$('#itemsContainer [data-item]').each(function(i){$(this).find('.itemIndex').text(i+1)})}
+function addItem(d={}){if($('#itemsContainer [data-item]').length>=maxItems)return;const n=document.getElementById('itemTemplate').content.cloneNode(true);$('#itemsContainer').append(n);const $i=$('#itemsContainer [data-item]').last();Object.entries(d).forEach(([k,v])=>{$i.find(`.product${k.charAt(0).toUpperCase()+k.slice(1)}`).val(v)});updateCounts();refresh()}
+$('#itemsContainer').on('click','.removeItem',function(){$(this).closest('[data-item]').remove();updateCounts();refresh()});$('#addItem').on('click',()=>addItem());$('#builder').on('input change','input,select',refresh);
+$('#csvFile').on('change',function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(evt){const l=evt.target.result.split(/\r?\n/).filter(x=>x.trim());const h=l.shift().split(',');$('#itemsContainer').empty();l.forEach(line=>{const v=line.split(',');const o={};h.forEach((hd,i)=>o[hd.trim()]=v[i]||'');addItem(o)})};r.readAsText(f)});
+$('#importBtn').on('click',function(){const html=$('#importHtml').val().trim();if(!html)return;const doc=new DOMParser().parseFromString(html,'text/html');$('#carouselTitle').val(doc.querySelector('.sg-content-item .bold')?.textContent.trim()||'');$('#itemsContainer').empty();doc.querySelectorAll('.product-card_content').forEach(c=>{addItem({link:c.querySelector('a')?.href||'',image:c.querySelector('img')?.src||'',brand:c.querySelector('.product-card_brand')?.textContent.trim()||'',name:c.querySelector('.product-card_name')?.textContent.trim()||'',msrp:c.querySelector('.product-card_price_msrp_strike')?.textContent.trim()||'',price:c.querySelector('.product-card_price_regular span')?.textContent.trim()||'',reviews:c.querySelector('.product-card_reviews span')?.textContent.match(/\d+/)?.[0]||'',rating:parseFloat(c.querySelector('.ratingsStars')?.alt)||'',badge:c.querySelector('.promo-badge')?.dataset.type||''})})});
+function ratingHTML(r){r=parseFloat(r)||0;const f=Math.floor(r),h=r%1>=.5;let t='';for(let i=0;i<f;i++)t+='★';if(h)t+='☆';return `<div class="rating">${t.split('').map(s=>`<span>${s}</span>`).join('')}</div>`}
+function badgeHTML(t){if(!t)return '';const m={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'};return `<span class="promo-badge" data-type="${t}">${m[t]||''}</span>`}
+function buildCard(d,i,tpl,sr){const img=d.image?`<img src="${d.image}" alt="${d.name||'product'}"/>`:placeholderImg;const name=d.name?`<div class="product-card_name">${d.name}</div>`:'';const brand=d.brand?`<p class="product-card_brand font-semibold"><a href="${d.link}">${d.brand}</a></p>`:'';const msrp=d.msrp?`<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> ${d.msrp} </span></div>`:'';const price=d.price?`<div class="product-card_price_regular">NEX Price <span> ${d.price} </span></div>`:'';let body='';if(tpl==='minimal'){body=name}else if(tpl==='promo'){body=`${name}${price}`}else{body=`${brand}${name}${msrp}${price}`}const rev=sr?`<div class="mt-2 flex items-center gap-1">${ratingHTML(d.rating)}<span>(${d.reviews})</span></div>`:'';return `<div class="relative w-40" data-idx="${i}"><div class="badge">${i+1}</div>${badgeHTML(d.badge)}<a href="${d.link}">${img}</a><div class="text-sm mt-2">${body}${rev}</div></div>`}
+function accessibility(){let issues=[];$('#previewArea img').each(function(){if(!$(this).attr('alt'))issues.push('Image missing alt text')});$('#a11yReport').text(issues.join(', '))}
+function buildOutput(arr,tpl,sr){const inner=arr.map((d,i)=>{const promo=badgeHTML(d.badge);const img=d.image?`<img src="${d.image}" alt="${d.name||'product'}"/>`:placeholderImg;const name=d.name?`<div class="product-card_name">${d.name}</div>`:'';const brand=d.brand?`<p class="product-card_brand"><a href="${d.link}">${d.brand}</a></p>`:'';const msrp=d.msrp?`<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> ${d.msrp} </span></div>`:'';const price=d.price?`<div class="product-card_price_regular">NEX Price <span> ${d.price} </span></div>`:'';let b='';if(tpl==='minimal'){b=name}else if(tpl==='promo'){b=`${name}${price}`}else{b=`${brand}${name}${msrp}${price}`}const rv=sr?`<div class="product-card_reviews mt-2 mb-2 d-flex align-items-center">${ratingHTML(d.rating)} <span class="ml-1">(${d.reviews})</span></div>`:'';return `<div class="product-card_content product-card_slider relative"><span class="badge">${i+1}</span>${promo}<div class="product-card_content_images p-0 mb-3"><a href="${d.link}">${img}</a></div><div class="product-card_content_description">${b}${rv}</div></div>`}).join('');const html=`<div class="sg-content col-12 row no-gutters"><div class="sg-content-item col-12 row align-items-center mx-0 my-4"><div class="col-12 bold mb-4" style="font-size:18px;">${$('#carouselTitle').val()}</div><div class="owl-carousel recently-viewed-carousel owl-theme">${inner}</div></div></div>`;$('#output').val(html)}
+function refresh(){const tpl=$('#templateSelect').val();const sr=$('#showReviews').is(':checked');const arr=[];$('#itemsContainer [data-item]').each(function(){const $el=$(this);arr.push({link:$el.find('.productLink').val(),name:$el.find('.productName').val(),brand:$el.find('.productBrand').val(),image:$el.find('.productImage').val(),msrp:$el.find('.productMsrp').val(),price:$el.find('.productPrice').val(),rating:$el.find('.productRating').val(),reviews:$el.find('.productReviews').val(),badge:$el.find('.productBadge').val()})});const cards=arr.map((d,i)=>buildCard(d,i,tpl,sr)).join('');$('#previewArea').html(cards);accessibility();buildOutput(arr,tpl,sr)}
+const sortable=new Sortable(document.getElementById('previewArea'),{animation:150,onEnd:function(e){const o=e.oldIndex,n=e.newIndex,$it=$('#itemsContainer [data-item]');const $moved=$it.eq(o);if(n===0){$('#itemsContainer').prepend($moved)}else{$it.eq(n).before($moved)}updateCounts();refresh()}});
+$(document).on('click','#copyCode',()=>navigator.clipboard.writeText($('#output').val()));addItem()});
+</script>
 </body>
 </html>
