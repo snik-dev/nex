@@ -27,9 +27,9 @@
 <div class="grid lg:grid-cols-3 gap-6 w-full">
   <div class="lg:col-span-1 space-y-6">
     <form id="builder" class="space-y-4">
-      <div><label class="block font-medium mb-1">Carousel Title</label><input id="carouselTitle" class="border rounded p-2 w-full"></div>
+      <div><label class="block font-medium mb-1">Carousel Title</label><input id="carouselTitle" autocomplete="off" class="border rounded p-2 w-full"></div>
       <div id="itemsContainer" class="space-y-6"></div>
-      <button id="addItem" type="button" class="bg-gold text-navy w-full py-2 rounded shadow">Add Item (0/10)</button>
+      <button id="addItem" type="button" title="⌘+Enter" class="bg-gold text-navy w-full py-2 rounded shadow">Add Item (0/10)</button>
     </form>
   </div>
 
@@ -53,96 +53,140 @@
   </div>
 </div>
 
+<!-- VISIBLE FIRST PRODUCT -->
+<div id="itemsContainer">
+  <div data-item class="border p-4 bg-white rounded shadow space-y-2">
+    <div class="flex justify-between items-center mb-2">
+      <span class="itemIndex font-bold">Product 1</span>
+      <button type="button" class="removeItem bg-red-500 text-white px-2 py-1 rounded">Remove</button>
+    </div>
+
+    <div class="grid grid-cols-[max-content_1fr] gap-2 items-center">
+      <input type="checkbox" class="toggleField" data-f="link" checked>
+      <input class="field border rounded p-2" data-f="link" placeholder="Full product URL" title="Paste full URL – stored as relative">
+
+      <input type="checkbox" class="toggleField" data-f="image" checked>
+      <input class="field border rounded p-2" data-f="image" placeholder="Image URL">
+
+      <input type="checkbox" class="toggleField" data-f="brand" checked>
+      <input class="field border rounded p-2" data-f="brand" placeholder="Brand">
+
+      <input type="checkbox" class="toggleField" data-f="name" checked>
+      <input class="field border rounded p-2" data-f="name" placeholder="Name">
+
+      <input type="checkbox" class="toggleField" data-f="msrp" checked>
+      <input class="field border rounded p-2" data-f="msrp" placeholder="MSRP">
+
+      <input type="checkbox" class="toggleField" data-f="price" checked>
+      <input class="field border rounded p-2" data-f="price" placeholder="Price">
+
+      <input type="checkbox" class="toggleField" data-f="rating" checked>
+      <input type="number" step="0.5" min="0" max="5" autocomplete="off" class="field border rounded p-2" data-f="rating" placeholder="Rating">
+
+      <input type="checkbox" class="toggleField" data-f="reviews" checked>
+      <input type="number" autocomplete="off" class="field border rounded p-2" data-f="reviews" placeholder="Review count">
+
+      <input type="checkbox" class="toggleField" data-f="badge" checked>
+      <select class="field border rounded p-2" data-f="badge">
+        <option value="">None</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- HIDDEN MASTER FOR CLONING -->
+<div id="rowMaster" class="hidden"></div>
+
 <script>
 $(function(){
   var BASE='https://www.mynavyexchange.com',MAX=10,ph='<div class="placeholder">No Image Added</div>';
-  var mapBadge={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'};
+  var badgeText={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'};
 
-  function rel(u){return u.replace(/^https?:\\/\\/www\\.mynavyexchange\\.com/,'');}
+  // clone initial visible row into master for future clones
+  $('#rowMaster').append($('#itemsContainer [data-item]').first().clone(true));
+
+  function relative(u){return u.replace(/^https?:\\/\\/www\\.mynavyexchange\\.com/,'');}
   function full(u){return u&&u[0]==='/'?BASE+u:u;}
-  function badge(t){return t?'<span class="promo-badge">'+mapBadge[t]+'</span>':'';}
-  function stars(v){v=parseFloat(v)||0;var s='';for(var i=1;i<=5;i++){if(v>=i)s+='★';else if(v>=i-0.5)s+='½';else s+='☆';}return s;}
+  function badge(b){return b?'<span class="promo-badge">'+badgeText[b]+'</span>':'';}
+  function starVisual(r){r=parseFloat(r)||0;let out='';for(let i=1;i<=5;i++){out+=r>=i?'★':r>=i-0.5?'½':'☆';}return out;}
 
-  function rowHTML(i){
-    return '<div data-item class="border p-4 bg-white rounded shadow space-y-2">'+
-      '<div class="flex justify-between items-center mb-2">'+
-        '<span class="itemIndex font-bold">Product '+i+'</span>'+
-        '<button type="button" class="removeItem bg-red-500 text-white px-2 py-1 rounded">Remove</button></div>'+
-      field('link','Product Link URL','url','Paste full URL – saved relative')+
-      field('image','Image URL','url')+
-      field('brand','Brand')+
-      field('name','Name')+
-      field('msrp','MSRP')+
-      field('price','Price')+
-      field('rating','Rating 0-5','.5','number step="0.5" min="0" max="5"')+
-      field('reviews','Review Count','number')+
-      fieldSelect()+'</div>';
-  }
-
-  function field(key,label,type,placeholder,extra){
-    placeholder=placeholder||'';extra=extra||'';
-    return '<label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="'+key+'" checked>'+label+'</label>'+
-           '<input '+(extra||'type="'+(type||'text')+'"')+' class="product'+cap(key)+' border rounded p-2 w-full" placeholder="'+placeholder+'">';
-  }
-  function fieldSelect(){
-    return '<label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="badge" checked>Promo Badge</label>'+
-           '<select class="productBadge border rounded p-2 w-full"><option value="">None</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option></select>';
-  }
-  function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+  function renumber(){let c=$('#itemsContainer [data-item]').length;$('#addItem').text(`Add Item (${c}/${MAX})`);$('#itemsContainer [data-item]').each((i,el)=>$(el).find('.itemIndex').text(`Product ${i+1}`));}
 
   function addRow(){
-    var c=$('#itemsContainer [data-item]').length;if(c>=MAX)return;
-    $('#itemsContainer').append(rowHTML(c+1));
-    $('#addItem').text('Add Item ('+(c+1)+'/'+MAX+')');
-    refresh();
+    if($('#itemsContainer [data-item]').length>=MAX) return;
+    $('#itemsContainer').append($('#rowMaster').children().first().clone(true));
+    renumber(); refresh();
   }
 
   $('#addItem').on('click',addRow);
-  $('#itemsContainer').on('click','.removeItem',function(){
-    $(this).closest('[data-item]').remove();
-    $('#itemsContainer [data-item]').each(function(i){$(this).find('.itemIndex').text('Product '+(i+1));});
-    $('#addItem').text('Add Item ('+$('#itemsContainer [data-item]').length+'/'+MAX+')');
-    refresh();
-  });
-  $('#builder').on('input change','input,select',refresh);
-  $('#itemsContainer').on('change','.toggleField',refresh);
+  $(document).on('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')addRow();});
 
-  function collect(){
-    var out=[];
+  $('#itemsContainer').on('click','.removeItem',function(){
+    $(this).closest('[data-item]').remove(); renumber(); refresh();
+  });
+
+  $('#builder').on('input change','.field, .toggleField',refresh);
+
+  function dataList(){
+    let arr=[];
     $('#itemsContainer [data-item]').each(function(){
-      var $e=$(this),sh={};$e.find('.toggleField').each(function(){sh[$(this).data('f')]=$(this).is(':checked');});
-      out.push({show:sh,link:rel($e.find('.productLink').val()),image:$e.find('.productImage').val(),brand:$e.find('.productBrand').val(),name:$e.find('.productName').val(),msrp:$e.find('.productMsrp').val(),price:$e.find('.productPrice').val(),rating:$e.find('.productRating').val(),reviews:$e.find('.productReviews').val(),badge:$e.find('.productBadge').val()});
+      let obj={show:{}};$(this).find('.toggleField').each(function(){obj.show[$(this).data('f')]=$(this).is(':checked');});
+      $(this).find('.field').each(function(){let key=$(this).data('f');obj[key]=key==='link'?relative($(this).val()):$(this).val();});
+      arr.push(obj);
     });
-    return out;
+    return arr;
   }
 
-  function card(d,i){
-    var img=d.show.image&&d.image?'<img src="'+full(d.image)+'" alt="">':ph,seg='';
-    if(d.show.brand&&d.brand)seg+='<p class="font-semibold">'+d.brand+'</p>';
-    if(d.show.name&&d.name)seg+='<div>'+d.name+'</div>';
-    if(d.show.msrp&&d.msrp)seg+='<div>Retail: '+d.msrp+'</div>';
-    if(d.show.price&&d.price)seg+='<div>NEX: '+d.price+'</div>';
-    if(d.show.reviews)seg+='<div>'+stars(d.rating)+' ('+d.reviews+')</div>';
-    return '<div class="relative w-44">'+badge(d.show.badge?d.badge:'')+'<div class="badge">'+(i+1)+'</div><a href="'+full(d.link)+'">'+img+'</a><div class="text-sm mt-2">'+seg+'</div></div>';
+  function previewHTML(d,i){
+    let img=d.show.image&&d.image?`<img src="${full(d.image)}" alt="">`:ph;
+    let seg='';if(d.show.brand&&d.brand)seg+=`<p class="font-semibold">${d.brand}</p>`;
+    if(d.show.name&&d.name)seg+=`<div>${d.name}</div>`;
+    if(d.show.msrp&&d.msrp)seg+=`<div>Retail: ${d.msrp}</div>`;
+    if(d.show.price&&d.price)seg+=`<div>NEX: ${d.price}</div>`;
+    if(d.show.reviews)seg+=`<div>${starVisual(d.rating)} (${d.reviews})</div>`;
+    return `<div class="relative w-44">${badge(d.show.badge?d.badge:'')}<div class="badge">${i+1}</div><a href="${full(d.link)}">${img}</a><div class="text-sm mt-2">${seg}</div></div>`;
+  }
+
+  function exportHTML(list){
+    let inner=list.map(d=>{
+      let img=d.show.image&&d.image?`<img src="${d.image}" alt="">`:ph;
+      let seg='';if(d.show.brand&&d.brand)seg+=`<p class="product-card_brand"><a href="${d.link}">${d.brand}</a></p>`;
+      if(d.show.name&&d.name)seg+=`<div class="product-card_name">${d.name}</div>`;
+      if(d.show.msrp&&d.msrp)seg+=`<div class="product-card_price_msrp">Retail: <span class="product-card_price_msrp_strike">${d.msrp}</span></div>`;
+      if(d.show.price&&d.price)seg+=`<div class="product-card_price_regular">NEX <span>${d.price}</span></div>`;
+      if(d.show.reviews){let file=(d.rating||'0').replace('.','_');seg+=`<div class="product-card_reviews"><img class="ratingsStars" alt="" src="/ux/img/stars/rating-${file}.gif"> <span>(${d.reviews})</span></div>`;}
+      return `<div class="product-card_content product-card_slider relative">${badge(d.show.badge?d.badge:'')}<div class="product-card_content_images p-0 mb-3"><a href="${d.link}">${img}</a></div><div class="product-card_content_description">${seg}</div></div>`;
+    }).join('');
+    $('#output').val(`<div class="owl-carousel">${inner}</div>`);
   }
 
   function refresh(){
     $('#previewTitle').text($('#carouselTitle').val());
-    var data=collect();
-    $('#previewArea').html(data.map(card).join(''));
-    $('#output').val(JSON.stringify(data,null,2));
+    let list=dataList();
+    $('#previewArea').html(list.map(previewHTML).join(''));
+    exportHTML(list);
   }
 
-  new Sortable(document.getElementById('previewArea'),{animation:150,onEnd:function(evt){
-    var p=$('#itemsContainer [data-item]').eq(evt.oldIndex).detach();
-    if(evt.newIndex===0)$('#itemsContainer').prepend(p);else $('#itemsContainer [data-item]').eq(evt.newIndex).before(p);
-    $('#itemsContainer [data-item]').each(function(i){$(this).find('.itemIndex').text('Product '+(i+1));});
-    refresh();
+  new Sortable(document.getElementById('previewArea'),{animation:150,onEnd:function(e){
+    $('#itemsContainer [data-item]').eq(e.oldIndex).insertBefore($('#itemsContainer [data-item]').eq(e.newIndex));
+    renumber(); refresh();
   }});
 
-  $(document).on('click','#copyCode',function(){navigator.clipboard.writeText($('#output').val());});
+  $('#csvFile').on('change',function(e){
+    let f=e.target.files[0];if(!f)return;
+    let r=new FileReader();r.onload=ev=>{
+      let lines=ev.target.result.split(/\\r?\\n/).filter(Boolean),head=lines.shift().split(',');
+      $('#itemsContainer').empty();
+      lines.forEach(line=>{
+        let vals=line.split(','),obj={};head.forEach((h,i)=>obj[h.trim()]=vals[i]||'');
+        addRow();let row=$('#itemsContainer [data-item]').last();
+        Object.keys(obj).forEach(k=>row.find('[data-f="'+k+'"]').val(obj[k]));
+      });
+      renumber(); refresh();
+    };r.readAsText(f);
+  });
 
-  addRow();
+  refresh();
 });
 </script>
 </body>
