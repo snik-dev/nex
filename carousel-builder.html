@@ -9,9 +9,9 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <style>
-  .badge{position:absolute;top:6px;left:6px;background:#ffc72c;color:#002366;font-weight:700;font-size:.75rem;padding:2px 6px;border-radius:9999px}
-  .promo-badge{position:absolute;top:6px;right:6px;background:#002366;color:#fff;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px}
-  .placeholder{background:#e2e8f0;display:flex;align-items:center;justify-content:center;height:200px;font-size:.875rem;color:#6b7280}
+.badge{position:absolute;top:6px;left:6px;background:#ffc72c;color:#002366;font-weight:700;font-size:.75rem;padding:2px 6px;border-radius:9999px}
+.promo-badge{position:absolute;top:6px;right:6px;background:#002366;color:#fff;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px}
+.placeholder{background:#e2e8f0;display:flex;align-items:center;justify-content:center;height:200px;font-size:.875rem;color:#6b7280}
 </style>
 </head>
 <body class="bg-gray-100 p-6 flex flex-col gap-6">
@@ -53,65 +53,57 @@
   </div>
 </div>
 
-<template id="rowTemplate">
-<div data-item class="border p-4 bg-white rounded shadow space-y-2">
-  <div class="flex justify-between items-center mb-2">
-    <span class="itemIndex font-bold">Product #</span>
-    <button type="button" class="removeItem bg-red-500 text-white px-2 py-1 rounded">Remove</button>
-  </div>
-
-  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="link" checked>Product Link URL</label>
-  <input class="productLink border rounded p-2 w-full" title="Paste full NEX URL – it saves as relative">
-
-  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="image" checked>Image URL</label>
-  <input class="productImage border rounded p-2 w-full">
-
-  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="brand" checked>Brand</label>
-  <input class="productBrand border rounded p-2 w-full">
-
-  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="name" checked>Name</label>
-  <input class="productName border rounded p-2 w-full">
-
-  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="msrp" checked>MSRP</label>
-  <input class="productMsrp border rounded p-2 w-full">
-
-  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="price" checked>Price</label>
-  <input class="productPrice border rounded p-2 w-full">
-
-  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="rating" checked>Rating (0-5 step 0.5)</label>
-  <input type="number" step="0.5" min="0" max="5" class="productRating border rounded p-2 w-full">
-
-  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="reviews" checked>Review Count</label>
-  <input type="number" class="productReviews border rounded p-2 w-full">
-
-  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="badge" checked>Promo Badge</label>
-  <select class="productBadge border rounded p-2 w-full">
-    <option value="">None</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option>
-  </select>
-</div>
-</template>
-
 <script>
 $(function(){
-  var BASE='https://www.mynavyexchange.com',MAX=10,placeholder='<div class="placeholder">No Image Added</div>';
+  var BASE='https://www.mynavyexchange.com',MAX=10,ph='<div class="placeholder">No Image Added</div>';
+  var mapBadge={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'};
+
   function rel(u){return u.replace(/^https?:\\/\\/www\\.mynavyexchange\\.com/,'');}
   function full(u){return u&&u[0]==='/'?BASE+u:u;}
-  function badge(t){if(!t)return'';var m={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'};return'<span class="promo-badge">'+m[t]+'</span>';}
-  function stars(r){var v=parseFloat(r)||0,f=Math.floor(v),h=v%1>=.5,s='';while(f--)s+='★';if(h)s+='½';return s;}
+  function badge(t){return t?'<span class="promo-badge">'+mapBadge[t]+'</span>':'';}
+  function stars(v){v=parseFloat(v)||0;var s='';for(var i=1;i<=5;i++){if(v>=i)s+='★';else if(v>=i-0.5)s+='½';else s+='☆';}return s;}
 
-  function renumber(){var c=$('#itemsContainer [data-item]').length;$('#addItem').text('Add Item ('+c+'/'+MAX+')');$('#itemsContainer [data-item]').each(function(i){$(this).find('.itemIndex').text('Product '+(i+1));});}
+  function rowHTML(i){
+    return '<div data-item class="border p-4 bg-white rounded shadow space-y-2">'+
+      '<div class="flex justify-between items-center mb-2">'+
+        '<span class="itemIndex font-bold">Product '+i+'</span>'+
+        '<button type="button" class="removeItem bg-red-500 text-white px-2 py-1 rounded">Remove</button></div>'+
+      field('link','Product Link URL','url','Paste full URL – saved relative')+
+      field('image','Image URL','url')+
+      field('brand','Brand')+
+      field('name','Name')+
+      field('msrp','MSRP')+
+      field('price','Price')+
+      field('rating','Rating 0-5','.5','number step="0.5" min="0" max="5"')+
+      field('reviews','Review Count','number')+
+      fieldSelect()+'</div>';
+  }
 
-function addRow() {
-  if ($('#itemsContainer [data-item]').length >= MAX) return;
-  $('#itemsContainer').append(
-    document.getElementById('rowTemplate').innerHTML
-  );
-  renumber();
-  refresh();
-}
+  function field(key,label,type,placeholder,extra){
+    placeholder=placeholder||'';extra=extra||'';
+    return '<label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="'+key+'" checked>'+label+'</label>'+
+           '<input '+(extra||'type="'+(type||'text')+'"')+' class="product'+cap(key)+' border rounded p-2 w-full" placeholder="'+placeholder+'">';
+  }
+  function fieldSelect(){
+    return '<label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="badge" checked>Promo Badge</label>'+
+           '<select class="productBadge border rounded p-2 w-full"><option value="">None</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option></select>';
+  }
+  function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+  function addRow(){
+    var c=$('#itemsContainer [data-item]').length;if(c>=MAX)return;
+    $('#itemsContainer').append(rowHTML(c+1));
+    $('#addItem').text('Add Item ('+(c+1)+'/'+MAX+')');
+    refresh();
+  }
 
   $('#addItem').on('click',addRow);
-  $('#itemsContainer').on('click','.removeItem',function(){$(this).closest('[data-item]').remove();renumber();refresh();});
+  $('#itemsContainer').on('click','.removeItem',function(){
+    $(this).closest('[data-item]').remove();
+    $('#itemsContainer [data-item]').each(function(i){$(this).find('.itemIndex').text('Product '+(i+1));});
+    $('#addItem').text('Add Item ('+$('#itemsContainer [data-item]').length+'/'+MAX+')');
+    refresh();
+  });
   $('#builder').on('input change','input,select',refresh);
   $('#itemsContainer').on('change','.toggleField',refresh);
 
@@ -119,27 +111,36 @@ function addRow() {
     var out=[];
     $('#itemsContainer [data-item]').each(function(){
       var $e=$(this),sh={};$e.find('.toggleField').each(function(){sh[$(this).data('f')]=$(this).is(':checked');});
-      out.push({link:rel($e.find('.productLink').val()),image:$e.find('.productImage').val(),brand:$e.find('.productBrand').val(),name:$e.find('.productName').val(),msrp:$e.find('.productMsrp').val(),price:$e.find('.productPrice').val(),rating:$e.find('.productRating').val(),reviews:$e.find('.productReviews').val(),badge:$e.find('.productBadge').val(),sh:sh});
-    });return out;
+      out.push({show:sh,link:rel($e.find('.productLink').val()),image:$e.find('.productImage').val(),brand:$e.find('.productBrand').val(),name:$e.find('.productName').val(),msrp:$e.find('.productMsrp').val(),price:$e.find('.productPrice').val(),rating:$e.find('.productRating').val(),reviews:$e.find('.productReviews').val(),badge:$e.find('.productBadge').val()});
+    });
+    return out;
   }
 
-  function prevCard(d,i){
-    var img=d.sh.image&&d.image?'<img src="'+full(d.image)+'" alt="">':placeholder,seg='';
-    if(d.sh.brand&&d.brand)seg+='<p class="font-semibold">'+d.brand+'</p>';
-    if(d.sh.name&&d.name)seg+='<div>'+d.name+'</div>';
-    if(d.sh.msrp&&d.msrp)seg+='<div>Retail: '+d.msrp+'</div>';
-    if(d.sh.price&&d.price)seg+='<div>NEX: '+d.price+'</div>';
-    if(d.sh.reviews)seg+='<div>'+stars(d.rating)+' ('+d.reviews+')</div>';
-    return'<div class="relative w-44">'+badge(d.sh.badge?d.badge:'')+'<div class="badge">'+(i+1)+'</div><a href="'+full(d.link)+'">'+img+'</a><div class="text-sm mt-2">'+seg+'</div></div>';
+  function card(d,i){
+    var img=d.show.image&&d.image?'<img src="'+full(d.image)+'" alt="">':ph,seg='';
+    if(d.show.brand&&d.brand)seg+='<p class="font-semibold">'+d.brand+'</p>';
+    if(d.show.name&&d.name)seg+='<div>'+d.name+'</div>';
+    if(d.show.msrp&&d.msrp)seg+='<div>Retail: '+d.msrp+'</div>';
+    if(d.show.price&&d.price)seg+='<div>NEX: '+d.price+'</div>';
+    if(d.show.reviews)seg+='<div>'+stars(d.rating)+' ('+d.reviews+')</div>';
+    return '<div class="relative w-44">'+badge(d.show.badge?d.badge:'')+'<div class="badge">'+(i+1)+'</div><a href="'+full(d.link)+'">'+img+'</a><div class="text-sm mt-2">'+seg+'</div></div>';
   }
 
   function refresh(){
     $('#previewTitle').text($('#carouselTitle').val());
-    var items=collect();
-    $('#previewArea').html(items.map(prevCard).join(''));
+    var data=collect();
+    $('#previewArea').html(data.map(card).join(''));
+    $('#output').val(JSON.stringify(data,null,2));
   }
 
-  new Sortable(document.getElementById('previewArea'),{animation:150,onEnd:function(evt){var it=$('#itemsContainer [data-item]');it.eq(evt.oldIndex).insertBefore(it.eq(evt.newIndex));renumber();refresh();}});
+  new Sortable(document.getElementById('previewArea'),{animation:150,onEnd:function(evt){
+    var p=$('#itemsContainer [data-item]').eq(evt.oldIndex).detach();
+    if(evt.newIndex===0)$('#itemsContainer').prepend(p);else $('#itemsContainer [data-item]').eq(evt.newIndex).before(p);
+    $('#itemsContainer [data-item]').each(function(i){$(this).find('.itemIndex').text('Product '+(i+1));});
+    refresh();
+  }});
+
+  $(document).on('click','#copyCode',function(){navigator.clipboard.writeText($('#output').val());});
 
   addRow();
 });
