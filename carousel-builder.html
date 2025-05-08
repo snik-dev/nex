@@ -6,188 +6,106 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={theme:{extend:{colors:{navy:'#002366',gold:'#ffc72c'}}}};</script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-<style>
-.badge{position:absolute;top:6px;left:6px;background:#ffc72c;color:#002366;font-weight:700;font-size:.75rem;padding:2px 6px;border-radius:9999px}
-.promo-badge{position:absolute;top:6px;right:6px;background:#002366;color:#fff;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px}
-.placeholder{background:#e2e8f0;display:flex;align-items:center;justify-content:center;height:200px;font-size:.875rem;color:#6b7280}
-</style>
 </head>
-<body class="bg-gray-100 p-6 flex flex-col gap-6">
+<body class="bg-gray-100 h-screen flex flex-col">
 
-<header class="bg-navy text-white p-4 rounded shadow mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-  <h1 class="text-2xl font-semibold">MNE.com Carousel Generator</h1>
-  <div class="flex items-center gap-2">
+<header class="bg-navy text-white p-4 flex flex-wrap gap-4 items-center justify-between">
+  <h1 class="text-xl font-semibold whitespace-nowrap">MNE.com Carousel Generator</h1>
+  <div class="flex gap-2 items-center">
     <input id="csvFile" type="file" accept=".csv" class="text-xs bg-white text-navy rounded p-1">
-    <a href="https://snik-dev.github.io/nex/template.csv" target="_blank" class="underline text-xs">Download CSV template</a>
+    <a href="https://snik-dev.github.io/nex/template.csv" class="underline text-xs">Download CSV template</a>
   </div>
 </header>
 
-<div class="grid lg:grid-cols-3 gap-6 w-full">
-  <div class="lg:col-span-1 space-y-6">
-    <form id="builder" class="space-y-4">
-      <div><label class="block font-medium mb-1">Carousel Title</label><input id="carouselTitle" autocomplete="off" class="border rounded p-2 w-full"></div>
-      <div id="itemsContainer" class="space-y-6"></div>
-      <button id="addItem" type="button" title="⌘+Enter" class="bg-gold text-navy w-full py-2 rounded shadow">Add Item (0/10)</button>
-    </form>
-  </div>
-
-  <div class="lg:col-span-2">
-    <h2 class="text-xl font-semibold mb-2">Live Preview <span class="text-sm text-gray-600">(drag to reorder)</span></h2>
-    <div id="previewTitle" class="font-semibold text-lg mb-3"></div>
-    <div id="previewArea" class="flex flex-nowrap gap-4 overflow-x-auto pb-4 min-h-[200px]"></div>
-  </div>
-</div>
-
-<div class="grid lg:grid-cols-2 gap-6 mt-8">
-  <div>
-    <h2 class="text-xl font-semibold mb-2">Generated HTML</h2>
-    <textarea id="output" class="w-full h-64 border p-2 font-mono text-xs"></textarea>
-    <button id="copyCode" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">Copy</button>
-  </div>
-  <div>
-    <h2 class="text-xl font-semibold mb-2">HTML Input (Import)</h2>
-    <textarea id="importHtml" class="w-full h-64 border p-2 font-mono text-xs"></textarea>
-    <button id="importBtn" class="mt-2 px-4 py-2 bg-navy text-white rounded shadow">Import</button>
-  </div>
-</div>
-
-<!-- VISIBLE FIRST PRODUCT -->
-<div id="itemsContainer">
-  <div data-item class="border p-4 bg-white rounded shadow space-y-2">
-    <div class="flex justify-between items-center mb-2">
-      <span class="itemIndex font-bold">Product 1</span>
-      <button type="button" class="removeItem bg-red-500 text-white px-2 py-1 rounded">Remove</button>
+<main class="flex-1 grid lg:grid-cols-[2fr_1fr] gap-4 p-4 overflow-hidden">
+  <section class="flex flex-col overflow-hidden">
+    <div class="flex gap-4 mb-4 items-end">
+      <div class="flex-1"><label class="block font-medium text-sm">Carousel Title</label><input id="carouselTitle" class="w-full border rounded p-2"></div>
+      <button id="addRow" class="bg-gold text-navy px-4 py-2 rounded shadow whitespace-nowrap">Add Product (0/10)</button>
     </div>
 
-    <div class="grid grid-cols-[max-content_1fr] gap-2 items-center">
-      <input type="checkbox" class="toggleField" data-f="link" checked>
-      <input class="field border rounded p-2" data-f="link" placeholder="Full product URL" title="Paste full URL – stored as relative">
+    <div class="flex gap-4 mb-2 flex-wrap">
+      <label class="flex items-center gap-1 text-sm"><input type="checkbox" class="fieldToggle" value="brand" checked>Brand</label>
+      <label class="flex items-center gap-1 text-sm"><input type="checkbox" class="fieldToggle" value="msrp" checked>MSRP</label>
+      <label class="flex items-center gap-1 text-sm"><input type="checkbox" class="fieldToggle" value="price" checked>Price</label>
+      <label class="flex items-center gap-1 text-sm"><input type="checkbox" class="fieldToggle" value="reviews" checked>Reviews</label>
+      <label class="flex items-center gap-1 text-sm"><input type="checkbox" class="fieldToggle" value="badge" checked>Badge</label>
+    </div>
 
-      <input type="checkbox" class="toggleField" data-f="image" checked>
-      <input class="field border rounded p-2" data-f="image" placeholder="Image URL">
+    <div class="overflow-auto flex-1">
+      <table class="min-w-full text-sm whitespace-nowrap">
+        <thead class="bg-gray-200 sticky top-0">
+          <tr>
+            <th class="w-8">#</th>
+            <th>Image</th>
+            <th data-col="name">Name</th>
+            <th data-col="brand">Brand</th>
+            <th data-col="msrp">MSRP</th>
+            <th data-col="price">Price</th>
+            <th data-col="badge">Badge</th>
+            <th class="w-8"></th>
+          </tr>
+        </thead>
+        <tbody id="gridBody"></tbody>
+      </table>
+    </div>
+  </section>
 
-      <input type="checkbox" class="toggleField" data-f="brand" checked>
-      <input class="field border rounded p-2" data-f="brand" placeholder="Brand">
+  <aside class="flex flex-col gap-2">
+    <h2 class="font-semibold">Live Preview</h2>
+    <div id="preview" class="flex flex-col gap-4 overflow-auto border p-2 bg-white rounded flex-1"></div>
+  </aside>
+</main>
 
-      <input type="checkbox" class="toggleField" data-f="name" checked>
-      <input class="field border rounded p-2" data-f="name" placeholder="Name">
+<section class="border-t p-4">
+  <details>
+    <summary class="cursor-pointer font-medium">Generated HTML / Import</summary>
+    <div class="grid lg:grid-cols-2 gap-4 mt-4">
+      <div>
+        <textarea id="out" class="w-full h-48 border p-2 text-xs font-mono"></textarea>
+        <button id="copy" class="mt-1 bg-navy text-white px-3 py-1 rounded text-sm">Copy</button>
+      </div>
+      <div>
+        <textarea id="in" class="w-full h-48 border p-2 text-xs font-mono"></textarea>
+        <button id="import" class="mt-1 bg-navy text-white px-3 py-1 rounded text-sm">Import</button>
+      </div>
+    </div>
+  </details>
+</section>
 
-      <input type="checkbox" class="toggleField" data-f="msrp" checked>
-      <input class="field border rounded p-2" data-f="msrp" placeholder="MSRP">
-
-      <input type="checkbox" class="toggleField" data-f="price" checked>
-      <input class="field border rounded p-2" data-f="price" placeholder="Price">
-
-      <input type="checkbox" class="toggleField" data-f="rating" checked>
-      <input type="number" step="0.5" min="0" max="5" autocomplete="off" class="field border rounded p-2" data-f="rating" placeholder="Rating">
-
-      <input type="checkbox" class="toggleField" data-f="reviews" checked>
-      <input type="number" autocomplete="off" class="field border rounded p-2" data-f="reviews" placeholder="Review count">
-
-      <input type="checkbox" class="toggleField" data-f="badge" checked>
-      <select class="field border rounded p-2" data-f="badge">
-        <option value="">None</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option>
+<template id="rowTemplate">
+  <tr data-row>
+    <td class="index text-center"></td>
+    <td><input type="url" data-f="image" class="w-32 border rounded p-1"></td>
+    <td data-col="name"><input type="text" data-f="name" class="border rounded p-1 w-40"></td>
+    <td data-col="brand"><input type="text" data-f="brand" class="border rounded p-1 w-32"></td>
+    <td data-col="msrp"><input type="text" data-f="msrp" class="border rounded p-1 w-20"></td>
+    <td data-col="price"><input type="text" data-f="price" class="border rounded p-1 w-20"></td>
+    <td data-col="badge">
+      <select data-f="badge" class="border rounded p-1">
+        <option value="">—</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option>
       </select>
-    </div>
-  </div>
-</div>
-
-<!-- HIDDEN MASTER FOR CLONING -->
-<div id="rowMaster" class="hidden"></div>
+    </td>
+    <td><button class="del text-red-600">✕</button></td>
+  </tr>
+</template>
 
 <script>
-$(function(){
-  var BASE='https://www.mynavyexchange.com',MAX=10,ph='<div class="placeholder">No Image Added</div>';
-  var badgeText={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'};
-
-  // clone initial visible row into master for future clones
-  $('#rowMaster').append($('#itemsContainer [data-item]').first().clone(true));
-
-  function relative(u){return u.replace(/^https?:\\/\\/www\\.mynavyexchange\\.com/,'');}
-  function full(u){return u&&u[0]==='/'?BASE+u:u;}
-  function badge(b){return b?'<span class="promo-badge">'+badgeText[b]+'</span>':'';}
-  function starVisual(r){r=parseFloat(r)||0;let out='';for(let i=1;i<=5;i++){out+=r>=i?'★':r>=i-0.5?'½':'☆';}return out;}
-
-  function renumber(){let c=$('#itemsContainer [data-item]').length;$('#addItem').text(`Add Item (${c}/${MAX})`);$('#itemsContainer [data-item]').each((i,el)=>$(el).find('.itemIndex').text(`Product ${i+1}`));}
-
-  function addRow(){
-    if($('#itemsContainer [data-item]').length>=MAX) return;
-    $('#itemsContainer').append($('#rowMaster').children().first().clone(true));
-    renumber(); refresh();
-  }
-
-  $('#addItem').on('click',addRow);
-  $(document).on('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')addRow();});
-
-  $('#itemsContainer').on('click','.removeItem',function(){
-    $(this).closest('[data-item]').remove(); renumber(); refresh();
-  });
-
-  $('#builder').on('input change','.field, .toggleField',refresh);
-
-  function dataList(){
-    let arr=[];
-    $('#itemsContainer [data-item]').each(function(){
-      let obj={show:{}};$(this).find('.toggleField').each(function(){obj.show[$(this).data('f')]=$(this).is(':checked');});
-      $(this).find('.field').each(function(){let key=$(this).data('f');obj[key]=key==='link'?relative($(this).val()):$(this).val();});
-      arr.push(obj);
-    });
-    return arr;
-  }
-
-  function previewHTML(d,i){
-    let img=d.show.image&&d.image?`<img src="${full(d.image)}" alt="">`:ph;
-    let seg='';if(d.show.brand&&d.brand)seg+=`<p class="font-semibold">${d.brand}</p>`;
-    if(d.show.name&&d.name)seg+=`<div>${d.name}</div>`;
-    if(d.show.msrp&&d.msrp)seg+=`<div>Retail: ${d.msrp}</div>`;
-    if(d.show.price&&d.price)seg+=`<div>NEX: ${d.price}</div>`;
-    if(d.show.reviews)seg+=`<div>${starVisual(d.rating)} (${d.reviews})</div>`;
-    return `<div class="relative w-44">${badge(d.show.badge?d.badge:'')}<div class="badge">${i+1}</div><a href="${full(d.link)}">${img}</a><div class="text-sm mt-2">${seg}</div></div>`;
-  }
-
-  function exportHTML(list){
-    let inner=list.map(d=>{
-      let img=d.show.image&&d.image?`<img src="${d.image}" alt="">`:ph;
-      let seg='';if(d.show.brand&&d.brand)seg+=`<p class="product-card_brand"><a href="${d.link}">${d.brand}</a></p>`;
-      if(d.show.name&&d.name)seg+=`<div class="product-card_name">${d.name}</div>`;
-      if(d.show.msrp&&d.msrp)seg+=`<div class="product-card_price_msrp">Retail: <span class="product-card_price_msrp_strike">${d.msrp}</span></div>`;
-      if(d.show.price&&d.price)seg+=`<div class="product-card_price_regular">NEX <span>${d.price}</span></div>`;
-      if(d.show.reviews){let file=(d.rating||'0').replace('.','_');seg+=`<div class="product-card_reviews"><img class="ratingsStars" alt="" src="/ux/img/stars/rating-${file}.gif"> <span>(${d.reviews})</span></div>`;}
-      return `<div class="product-card_content product-card_slider relative">${badge(d.show.badge?d.badge:'')}<div class="product-card_content_images p-0 mb-3"><a href="${d.link}">${img}</a></div><div class="product-card_content_description">${seg}</div></div>`;
-    }).join('');
-    $('#output').val(`<div class="owl-carousel">${inner}</div>`);
-  }
-
-  function refresh(){
-    $('#previewTitle').text($('#carouselTitle').val());
-    let list=dataList();
-    $('#previewArea').html(list.map(previewHTML).join(''));
-    exportHTML(list);
-  }
-
-  new Sortable(document.getElementById('previewArea'),{animation:150,onEnd:function(e){
-    $('#itemsContainer [data-item]').eq(e.oldIndex).insertBefore($('#itemsContainer [data-item]').eq(e.newIndex));
-    renumber(); refresh();
-  }});
-
-  $('#csvFile').on('change',function(e){
-    let f=e.target.files[0];if(!f)return;
-    let r=new FileReader();r.onload=ev=>{
-      let lines=ev.target.result.split(/\\r?\\n/).filter(Boolean),head=lines.shift().split(',');
-      $('#itemsContainer').empty();
-      lines.forEach(line=>{
-        let vals=line.split(','),obj={};head.forEach((h,i)=>obj[h.trim()]=vals[i]||'');
-        addRow();let row=$('#itemsContainer [data-item]').last();
-        Object.keys(obj).forEach(k=>row.find('[data-f="'+k+'"]').val(obj[k]));
-      });
-      renumber(); refresh();
-    };r.readAsText(f);
-  });
-
-  refresh();
-});
+const MAX=10,badgeMap={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'};
+const tmpl=document.getElementById('rowTemplate').content,body=document.getElementById('gridBody'),preview=document.getElementById('preview'),out=document.getElementById('out');
+const urlRel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,'');const urlFull=u=>u&&u[0]==='/'?'https://www.mynavyexchange.com'+u:u;
+const stars=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
+function renumber(){[...body.children].forEach((r,i)=>r.querySelector('.index').textContent=i+1);document.getElementById('addRow').textContent=`Add Product (${body.children.length}/${MAX})`}
+function rowData(tr){let d={};tr.querySelectorAll('[data-f]').forEach(i=>d[i.dataset.f]=i.type==='url'?urlRel(i.value):i.value);return d}
+function buildPrev(d,i){return `<div class="relative text-xs w-40"><div class="badge">${i+1}</div>${d.badge?`<span class="promo-badge">${badgeMap[d.badge]}</span>`:''}<a href="${urlFull(d.link||'')}"><img src="${urlFull(d.image||'')}" class="w-full h-28 object-cover bg-gray-200" onerror="this.src=''"></a><div class="mt-1">${d.brand?`<p class="font-semibold">${d.brand}</p>`:''}${d.name?`<p>${d.name}</p>`:''}${d.msrp?`<p>Retail: ${d.msrp}</p>`:''}${d.price?`<p>NEX: ${d.price}</p>`:''}${d.reviews?`<p>${stars(d.rating)} (${d.reviews})</p>`:''}</div></div>`}
+function refresh(){const rows=[...body.children].map(rowData);preview.innerHTML=rows.map(buildPrev).join('');out.value=JSON.stringify(rows,null,2)}
+document.getElementById('addRow').onclick=()=>{if(body.children.length<MAX){body.append(tmpl.cloneNode(true));renumber();refresh()}};
+body.addEventListener('input',refresh);
+body.addEventListener('click',e=>{if(e.target.classList.contains('del')){e.target.closest('tr').remove();renumber();refresh()}});
+document.querySelectorAll('.fieldToggle').forEach(c=>{c.onchange=()=>{document.querySelectorAll(`[data-col="${c.value}"]`).forEach(td=>td.classList.toggle('hidden',!c.checked));refresh()}});
+new Sortable(preview,{animation:150,onEnd:e=>{body.append(body.children[e.oldIndex]);}})
+renumber();refresh();
 </script>
 </body>
 </html>
