@@ -101,11 +101,14 @@ $(function(){
 
   function renumber(){var c=$('#itemsContainer [data-item]').length;$('#addItem').text('Add Item ('+c+'/'+MAX+')');$('#itemsContainer [data-item]').each(function(i){$(this).find('.itemIndex').text('Product '+(i+1));});}
 
-  function addRow(){
-    if($('#itemsContainer [data-item]').length>=MAX)return;
-    $('#itemsContainer').append(document.getElementById('rowTemplate').content.cloneNode(true));
-    renumber();refresh();
-  }
+function addRow() {
+  if ($('#itemsContainer [data-item]').length >= MAX) return;
+  $('#itemsContainer').append(
+    document.getElementById('rowTemplate').innerHTML
+  );
+  renumber();
+  refresh();
+}
 
   $('#addItem').on('click',addRow);
   $('#itemsContainer').on('click','.removeItem',function(){$(this).closest('[data-item]').remove();renumber();refresh();});
