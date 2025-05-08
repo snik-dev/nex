@@ -18,6 +18,7 @@
   </style>
 </head>
 <body class="bg-gray-100 p-6 flex flex-col gap-6">
+
 <header class="bg-navy text-white p-4 rounded shadow mb-6">
   <h1 class="text-3xl font-semibold">MNE.com Carousel Generator</h1>
 </header>
@@ -26,9 +27,13 @@
   <div class="lg:col-span-1 space-y-6">
     <form id="builder" class="space-y-4">
       <div><label class="block font-medium mb-1">Carousel Title</label><input id="carouselTitle" class="border rounded p-2 w-full"></div>
+
       <div id="itemsContainer" class="space-y-6"></div>
+
       <button id="addItem" type="button" class="bg-gold text-navy w-full py-2 rounded shadow">Add Item (0/10)</button>
+
       <hr class="my-4">
+
       <h2 class="font-semibold text-lg mb-2">Bulk CSV Upload</h2>
       <input id="csvFile" type="file" accept=".csv" class="mb-2"><br>
       <a href="https://snik-dev.github.io/nex/template.csv" target="_blank" class="text-sm text-navy underline">Download CSV template</a>
@@ -56,45 +61,47 @@
   </div>
 </div>
 
-<script type="text/x-template" id="rowTemplate">
+<template id="rowTemplate">
 <div data-item class="border p-4 rounded shadow bg-white space-y-3">
   <div class="flex justify-between items-center">
     <span class="itemIndex font-bold">#</span>
     <button type="button" class="removeItem bg-red-500 text-white px-2 py-1 rounded">Remove</button>
   </div>
-  <div class="space-y-2">
 
-    <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="brand" checked>Brand</label>
-    <input class="productBrand border rounded p-2 w-full">
+  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="brand" checked>Brand</label>
+  <input class="productBrand border rounded p-2 w-full">
 
-    <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="name" checked>Name</label>
-    <input class="productName border rounded p-2 w-full">
+  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="name" checked>Name</label>
+  <input class="productName border rounded p-2 w-full">
 
-    <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="image" checked>Image URL</label>
-    <input class="productImage border rounded p-2 w-full">
+  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="image" checked>Image URL</label>
+  <input class="productImage border rounded p-2 w-full">
 
-    <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="msrp" checked>MSRP</label>
-    <input class="productMsrp border rounded p-2 w-full">
+  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="msrp" checked>MSRP</label>
+  <input class="productMsrp border rounded p-2 w-full">
 
-    <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="price" checked>Price</label>
-    <input class="productPrice border rounded p-2 w-full">
+  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="price" checked>Price</label>
+  <input class="productPrice border rounded p-2 w-full">
 
-    <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="rating" checked>Rating (0-5)</label>
-    <input type="number" step="0.5" min="0" max="5" class="productRating border rounded p-2 w-full">
+  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="rating" checked>Rating (0-5)</label>
+  <input type="number" step="0.5" min="0" max="5" class="productRating border rounded p-2 w-full">
 
-    <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="reviews" checked>Review Count</label>
-    <input type="number" class="productReviews border rounded p-2 w-full">
+  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="reviews" checked>Review Count</label>
+  <input type="number" class="productReviews border rounded p-2 w-full">
 
-    <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="badge" checked>Promo Badge</label>
-    <select class="productBadge border rounded p-2 w-full">
-      <option value="">None</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option>
-    </select>
+  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-field="badge" checked>Promo Badge</label>
+  <select class="productBadge border rounded p-2 w-full">
+    <option value="">None</option>
+    <option value="clearance">Clearance</option>
+    <option value="last-chance">Last Chance</option>
+    <option value="new">New</option>
+    <option value="exclusive">NEX Exclusive</option>
+  </select>
 
-    <label class="flex items-center gap-2">Product Link URL</label>
-    <input class="productLink border rounded p-2 w-full">
-  </div>
+  <label class="flex items-center gap-2">Product Link URL</label>
+  <input class="productLink border rounded p-2 w-full">
 </div>
-</script>
+</template>
 
 <script>
 $(function(){
@@ -107,12 +114,12 @@ $(function(){
 
   function updateCounts(){var c=$('#itemsContainer [data-item]').length;$('#addItem').text('Add Item ('+c+'/'+MAX+')').prop('disabled',c>=MAX).toggleClass('opacity-50 cursor-not-allowed',c>=MAX);$('#itemsContainer [data-item]').each(function(i){$(this).find('.itemIndex').text(i+1);});}
 
-  function addItem(data){
+  function addItem(d){
     if($('#itemsContainer [data-item]').length>=MAX)return;
-    var html=$('#rowTemplate').html();
+    var html=document.getElementById('rowTemplate').innerHTML.trim();
     $('#itemsContainer').append(html);
     var $w=$('#itemsContainer [data-item]').last();
-    if(data)$.each(data,function(k,v){$w.find('.product'+k.charAt(0).toUpperCase()+k.slice(1)).val(v);});
+    if(d)$.each(d,function(k,v){$w.find('.product'+k.charAt(0).toUpperCase()+k.slice(1)).val(v);});
     updateCounts();
     refresh();
   }
@@ -124,38 +131,49 @@ $(function(){
 
   function makePreview(d,i){
     var img=d.fields.image&&d.image?'<img src="'+full(d.image)+'" alt="'+(d.name||'product')+'">':placeholder;
-    var segments=[];
-    if(d.fields.brand&&d.brand)segments.push('<p class="product-card_brand font-semibold"><a href="'+full(d.link)+'">'+d.brand+'</a></p>');
-    if(d.fields.name&&d.name)segments.push('<div class="product-card_name">'+d.name+'</div>');
-    if(d.fields.msrp&&d.msrp)segments.push('<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> '+d.msrp+' </span></div>');
-    if(d.fields.price&&d.price)segments.push('<div class="product-card_price_regular">NEX Price <span> '+d.price+' </span></div>');
-    if(d.fields.reviews)segments.push('<div class="product-card_reviews mt-2 mb-2 d-flex align-items-center">'+charStars(d.rating)+' <span class="ml-2">('+d.reviews+')</span></div>');
-    return'<div class="relative w-48"><div class="badge">'+(i+1)+'</div>'+badge(d.fields.badge?d.badge:'')+'<a href="'+full(d.link)+'">'+img+'</a><div class="text-sm mt-2">'+segments.join('')+'</div></div>';
+    var seg=[];
+    if(d.fields.brand&&d.brand) seg.push('<p class="product-card_brand font-semibold"><a href="'+full(d.link)+'">'+d.brand+'</a></p>');
+    if(d.fields.name&&d.name) seg.push('<div class="product-card_name">'+d.name+'</div>');
+    if(d.fields.msrp&&d.msrp) seg.push('<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> '+d.msrp+' </span></div>');
+    if(d.fields.price&&d.price) seg.push('<div class="product-card_price_regular">NEX Price <span> '+d.price+' </span></div>');
+    if(d.fields.reviews) seg.push('<div class="product-card_reviews mt-2 mb-2 d-flex align-items-center">'+charStars(d.rating)+' <span class="ml-2">('+d.reviews+')</span></div>');
+    return'<div class="relative w-48"><div class="badge">'+(i+1)+'</div>'+badge(d.fields.badge?d.badge:'')+'<a href="'+full(d.link)+'">'+img+'</a><div class="text-sm mt-2">'+seg.join('')+'</div></div>';
   }
 
   function buildExport(items){
     var inner=items.map(function(d,i){
       var img=d.fields.image&&d.image?'<img src="'+d.image+'" alt="'+(d.name||'product')+'">':placeholder;
-      var segs=[];
-      if(d.fields.brand&&d.brand)segs.push('<p class="product-card_brand"><a href="'+d.link+'">'+d.brand+'</a></p>');
-      if(d.fields.name&&d.name)segs.push('<div class="product-card_name">'+d.name+'</div>');
-      if(d.fields.msrp&&d.msrp)segs.push('<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> '+d.msrp+' </span></div>');
-      if(d.fields.price&&d.price)segs.push('<div class="product-card_price_regular">NEX Price <span> '+d.price+' </span></div>');
-      if(d.fields.reviews)segs.push('<div class="product-card_reviews mt-2 mb-2 d-flex align-items-center">'+gifStars(d.rating)+' <span class="ml-2">('+d.reviews+')</span></div>');
-      return'<div class="product-card_content product-card_slider relative"><span class="badge">'+(i+1)+'</span>'+badge(d.fields.badge?d.badge:'')+'<div class="product-card_content_images p-0 mb-3"><a href="'+d.link+'">'+img+'</a></div><div class="product-card_content_description">'+segs.join('')+'</div></div>';
+      var seg=[];
+      if(d.fields.brand&&d.brand) seg.push('<p class="product-card_brand"><a href="'+d.link+'">'+d.brand+'</a></p>');
+      if(d.fields.name&&d.name) seg.push('<div class="product-card_name">'+d.name+'</div>');
+      if(d.fields.msrp&&d.msrp) seg.push('<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> '+d.msrp+' </span></div>');
+      if(d.fields.price&&d.price) seg.push('<div class="product-card_price_regular">NEX Price <span> '+d.price+' </span></div>');
+      if(d.fields.reviews) seg.push('<div class="product-card_reviews mt-2 mb-2 d-flex align-items-center">'+gifStars(d.rating)+' <span class="ml-2">('+d.reviews+')</span></div>');
+      return'<div class="product-card_content product-card_slider relative"><span class="badge">'+(i+1)+'</span>'+badge(d.fields.badge?d.badge:'')+'<div class="product-card_content_images p-0 mb-3"><a href="'+d.link+'">'+img+'</a></div><div class="product-card_content_description">'+seg.join('')+'</div></div>';
     }).join('');
-    var out='<div class="sg-content col-12 row no-gutters"><div class="sg-content-item col-12 row align-items-center mx-0 my-4"><div class="col-12 bold mb-4" style="font-size:18px;">'+$('#carouselTitle').val()+'</div><div class="owl-carousel recently-viewed-carousel owl-theme">'+inner+'</div></div></div><script>$(document).ready(function(){var c=$(\\\".recently-viewed-carousel\\\"),len=c[0].children.length;c.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,navText:[\\'<span class=\\\"fas fa-chevron-left fa-2x\\\"></span>\\',\\'<span class=\\\"fas fa-chevron-right fa-2x\\\"></span>\\'],dots:true,responsive:{0:{items:3,loop:true},361:{items:3,loop:len>1},571:{items:3,loop:len>2},721:{items:4,loop:len>3},857:{items:5,loop:len>4},993:{items:5,loop:len>5}}});});<\\/script>';
-    $('#output').val(out);
+    var html='<div class="sg-content col-12 row no-gutters"><div class="sg-content-item col-12 row align-items-center mx-0 my-4"><div class="col-12 bold mb-4" style="font-size:18px;">'+$('#carouselTitle').val()+'</div><div class="owl-carousel recently-viewed-carousel owl-theme">'+inner+'</div></div></div><script>$(document).ready(function(){var c=$(\\\".recently-viewed-carousel\\\"),len=c[0].children.length;c.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,navText:[\\'<span class=\\\"fas fa-chevron-left fa-2x\\\"></span>\\',\\'<span class=\\\"fas fa-chevron-right fa-2x\\\"></span>\\'],dots:true,responsive:{0:{items:3,loop:true},361:{items:3,loop:len>1},571:{items:3,loop:len>2},721:{items:4,loop:len>3},857:{items:5,loop:len>4},993:{items:5,loop:len>5}}});});<\\/script>';
+    $('#output').val(html);
   }
 
   function refresh(){
     $('#previewTitle').text($('#carouselTitle').val());
     var items=[];
     $('#itemsContainer [data-item]').each(function(){
-      var $e=$(this), fields={};
-      $e.find('.toggleField').each(function(){fields[$(this).data('field')]=$(this).is(':checked');});
+      var $e=$(this),fields={};
+      $e.find('.toggleField').each(function(){
+        fields[$(this).data('field')]=$(this).is(':checked');
+      });
       items.push({
-        link:$e.find('.productLink').val(),brand:$e.find('.productBrand').val(),name:$e.find('.productName').val(),image:$e.find('.productImage').val(),msrp:$e.find('.productMsrp').val(),price:$e.find('.productPrice').val(),rating:$e.find('.productRating').val(),reviews:$e.find('.productReviews').val(),badge:$e.find('.productBadge').val(),fields:fields
+        link:$e.find('.productLink').val(),
+        brand:$e.find('.productBrand').val(),
+        name:$e.find('.productName').val(),
+        image:$e.find('.productImage').val(),
+        msrp:$e.find('.productMsrp').val(),
+        price:$e.find('.productPrice').val(),
+        rating:$e.find('.productRating').val(),
+        reviews:$e.find('.productReviews').val(),
+        badge:$e.find('.productBadge').val(),
+        fields:fields
       });
     });
     $('#previewArea').html(items.map(function(d,i){return makePreview(d,i);}).join(''));
@@ -163,9 +181,15 @@ $(function(){
     buildExport(items);
   }
 
-  new Sortable(document.getElementById('previewArea'),{animation:150,onEnd:function(evt){var $items=$('#itemsContainer [data-item]');var moved=$items.eq(evt.oldIndex);if(evt.newIndex===0)$('#itemsContainer').prepend(moved);else $items.eq(evt.newIndex).before(moved);updateCounts();refresh();}});
-  $(document).on('click','#copyCode',function(){navigator.clipboard.writeText($('#output').val());});
+  new Sortable(document.getElementById('previewArea'),{animation:150,onEnd:function(evt){var items=$('#itemsContainer [data-item]');var moved=items.eq(evt.oldIndex);if(evt.newIndex===0)$('#itemsContainer').prepend(moved);else items.eq(evt.newIndex).before(moved);updateCounts();refresh();}});
+
+  $(document).on('click','#copyCode',function(){
+    navigator.clipboard.writeText($('#output').val());
+  });
+
   addItem();
+  updateCounts();
+  refresh();
 });
 </script>
 </body>
