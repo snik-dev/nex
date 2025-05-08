@@ -53,7 +53,7 @@
   </div>
 </div>
 
-<script type="text/x-template" id="rowTemplate">
+<template id="rowTemplate">
 <div data-item class="border p-4 bg-white rounded shadow space-y-2">
   <div class="flex justify-between items-center mb-2">
     <span class="itemIndex font-bold">Product #</span>
@@ -78,7 +78,7 @@
   <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="price" checked>Price</label>
   <input class="productPrice border rounded p-2 w-full">
 
-  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="rating" checked>Rating (0-5, .5)</label>
+  <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="rating" checked>Rating (0-5 step 0.5)</label>
   <input type="number" step="0.5" min="0" max="5" class="productRating border rounded p-2 w-full">
 
   <label class="flex items-center gap-2"><input type="checkbox" class="toggleField" data-f="reviews" checked>Review Count</label>
@@ -89,26 +89,22 @@
     <option value="">None</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option>
   </select>
 </div>
-</script>
+</template>
 
 <script>
 $(function(){
   var BASE='https://www.mynavyexchange.com',MAX=10,placeholder='<div class="placeholder">No Image Added</div>';
-
   function rel(u){return u.replace(/^https?:\\/\\/www\\.mynavyexchange\\.com/,'');}
   function full(u){return u&&u[0]==='/'?BASE+u:u;}
-  function badge(t){if(!t)return'';var map={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'};return'<span class="promo-badge" data-type="'+t+'">'+map[t]+'</span>';}
+  function badge(t){if(!t)return'';var m={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'};return'<span class="promo-badge">'+m[t]+'</span>';}
   function stars(r){var v=parseFloat(r)||0,f=Math.floor(v),h=v%1>=.5,s='';while(f--)s+='★';if(h)s+='½';return s;}
+
+  function renumber(){var c=$('#itemsContainer [data-item]').length;$('#addItem').text('Add Item ('+c+'/'+MAX+')');$('#itemsContainer [data-item]').each(function(i){$(this).find('.itemIndex').text('Product '+(i+1));});}
 
   function addRow(){
     if($('#itemsContainer [data-item]').length>=MAX)return;
-    $('#itemsContainer').append(document.getElementById('rowTemplate').textContent.trim());
+    $('#itemsContainer').append(document.getElementById('rowTemplate').content.cloneNode(true));
     renumber();refresh();
-  }
-
-  function renumber(){
-    $('#addItem').text('Add Item ('+$('#itemsContainer [data-item]').length+'/'+MAX+')');
-    $('#itemsContainer [data-item]').each(function(i){$(this).find('.itemIndex').text('Product '+(i+1));});
   }
 
   $('#addItem').on('click',addRow);
@@ -117,71 +113,30 @@ $(function(){
   $('#itemsContainer').on('change','.toggleField',refresh);
 
   function collect(){
-    var items=[];
+    var out=[];
     $('#itemsContainer [data-item]').each(function(){
-      var $e=$(this),show={};
-      $e.find('.toggleField').each(function(){show[$(this).data('f')]=$(this).is(':checked');});
-      items.push({
-        link:rel($e.find('.productLink').val()),
-        image:$e.find('.productImage').val(),
-        brand:$e.find('.productBrand').val(),
-        name:$e.find('.productName').val(),
-        msrp:$e.find('.productMsrp').val(),
-        price:$e.find('.productPrice').val(),
-        rating:$e.find('.productRating').val(),
-        reviews:$e.find('.productReviews').val(),
-        badge:$e.find('.productBadge').val(),
-        show:show
-      });
-    });
-    return items;
+      var $e=$(this),sh={};$e.find('.toggleField').each(function(){sh[$(this).data('f')]=$(this).is(':checked');});
+      out.push({link:rel($e.find('.productLink').val()),image:$e.find('.productImage').val(),brand:$e.find('.productBrand').val(),name:$e.find('.productName').val(),msrp:$e.find('.productMsrp').val(),price:$e.find('.productPrice').val(),rating:$e.find('.productRating').val(),reviews:$e.find('.productReviews').val(),badge:$e.find('.productBadge').val(),sh:sh});
+    });return out;
   }
 
-  function previewCard(d,i){
-    var img=d.show.image&&d.image?'<img src="'+full(d.image)+'" alt="'+(d.name||'product')+'">':placeholder;
-    var seg='';
-    if(d.show.brand&&d.brand)seg+='<p class="font-semibold">'+d.brand+'</p>';
-    if(d.show.name&&d.name)seg+='<div>'+d.name+'</div>';
-    if(d.show.msrp&&d.msrp)seg+='<div>Retail: '+d.msrp+'</div>';
-    if(d.show.price&&d.price)seg+='<div>NEX: '+d.price+'</div>';
-    if(d.show.reviews)seg+='<div>'+stars(d.rating)+' ('+d.reviews+')</div>';
-    return'<div class="relative w-44">'+badge(d.show.badge?d.badge:'')+'<div class="badge">'+(i+1)+'</div><a href="'+full(d.link)+'">'+img+'</a><div class="text-sm mt-2">'+seg+'</div></div>';
-  }
-
-  function exportHTML(items){
-    var inn=items.map(function(d,i){
-      var img=d.show.image&&d.image?'<img src="'+d.image+'" alt="'+(d.name||'product')+'">':placeholder;
-      var seg='';
-      if(d.show.brand&&d.brand)seg+='<p class="product-card_brand"><a href="'+d.link+'">'+d.brand+'</a></p>';
-      if(d.show.name&&d.name)seg+='<div class="product-card_name">'+d.name+'</div>';
-      if(d.show.msrp&&d.msrp)seg+='<div class="product-card_price_msrp">Retail: <span class="product-card_price_msrp_strike">'+d.msrp+'</span></div>';
-      if(d.show.price&&d.price)seg+='<div class="product-card_price_regular">NEX <span>'+d.price+'</span></div>';
-      if(d.show.reviews)seg+='<div class="product-card_reviews"><img class="ratingsStars" alt="" src="/ux/img/stars/rating-'+(d.rating?String(d.rating).replace('.','_'):'0_0')+'.gif"> <span>('+(d.reviews||0)+')</span></div>';
-      return'<div class="product-card_content product-card_slider relative">'+badge(d.show.badge?d.badge:'')+'<div class="product-card_content_images p-0 mb-3"><a href="'+d.link+'">'+img+'</a></div><div class="product-card_content_description">'+seg+'</div></div>';
-    }).join('');
-    $('#output').val('<div class="owl-carousel">'+inn+'</div>');
+  function prevCard(d,i){
+    var img=d.sh.image&&d.image?'<img src="'+full(d.image)+'" alt="">':placeholder,seg='';
+    if(d.sh.brand&&d.brand)seg+='<p class="font-semibold">'+d.brand+'</p>';
+    if(d.sh.name&&d.name)seg+='<div>'+d.name+'</div>';
+    if(d.sh.msrp&&d.msrp)seg+='<div>Retail: '+d.msrp+'</div>';
+    if(d.sh.price&&d.price)seg+='<div>NEX: '+d.price+'</div>';
+    if(d.sh.reviews)seg+='<div>'+stars(d.rating)+' ('+d.reviews+')</div>';
+    return'<div class="relative w-44">'+badge(d.sh.badge?d.badge:'')+'<div class="badge">'+(i+1)+'</div><a href="'+full(d.link)+'">'+img+'</a><div class="text-sm mt-2">'+seg+'</div></div>';
   }
 
   function refresh(){
     $('#previewTitle').text($('#carouselTitle').val());
-    var data=collect();
-    $('#previewArea').html(data.map(previewCard).join(''));
-    exportHTML(data);
+    var items=collect();
+    $('#previewArea').html(items.map(prevCard).join(''));
   }
 
-  new Sortable(document.getElementById('previewArea'),{animation:150,onEnd:function(evt){var rows=$('#itemsContainer [data-item]');rows.eq(evt.oldIndex).insertBefore(rows.eq(evt.newIndex));renumber();refresh();}});
-
-  $(document).on('click','#copyCode',function(){navigator.clipboard.writeText($('#output').val());});
-
-  $('#csvFile').on('change',function(e){
-    var f=e.target.files[0];if(!f)return;
-    var r=new FileReader();
-    r.onload=function(ev){
-      var lines=ev.target.result.split(/\\r?\\n/).filter(Boolean),head=lines.shift().split(',');
-      $('#itemsContainer').empty();
-      lines.forEach(function(line){var vals=line.split(','),obj={};head.forEach(function(h,i){obj[h.trim()]=vals[i]||'';});addRow();$('#itemsContainer [data-item]:last').find('.productLink').val(obj.link);$('#itemsContainer [data-item]:last').find('.productImage').val(obj.image);$('#itemsContainer [data-item]:last').find('.productBrand').val(obj.brand);$('#itemsContainer [data-item]:last').find('.productName').val(obj.name);$('#itemsContainer [data-item]:last').find('.productMsrp').val(obj.msrp);$('#itemsContainer [data-item]:last').find('.productPrice').val(obj.price);$('#itemsContainer [data-item]:last').find('.productRating').val(obj.rating);$('#itemsContainer [data-item]:last').find('.productReviews').val(obj.reviews);$('#itemsContainer [data-item]:last').find('.productBadge').val(obj.badge);});renumber();refresh();};
-    r.readAsText(f);
-  });
+  new Sortable(document.getElementById('previewArea'),{animation:150,onEnd:function(evt){var it=$('#itemsContainer [data-item]');it.eq(evt.oldIndex).insertBefore(it.eq(evt.newIndex));renumber();refresh();}});
 
   addRow();
 });
