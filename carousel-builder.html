@@ -94,7 +94,7 @@ preview=$("#preview"),exp=$("#export");
 
 const rel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,''),
 full=u=>u&&u[0]==='/'?base+u:u,
-stars=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
+ascii=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
 
 function addCard(o={}){
   if(cards.children().length>=MAX)return;
@@ -106,24 +106,38 @@ function addCard(o={}){
 function renumber(){cards.children().each((i,e)=>$(e).find('.cardHead').text('Product '+(i+1)));$('#add').text(`Add Product (${cards.children().length}/${MAX})`)}
 function gather(){return cards.children().map((_,d)=>{const o={};$(d).find('[data-f]').each((__,f)=>o[$(f).data('f')]=$(f).val());o.link=rel(o.link||'');return o}).get();}
 function badge(b){return b?`<span class="promo-badge">${badgeTxt[b]}</span>`:''}
-function cardHtml(d,i){
-  const ratingFile=(d.rating?String(d.rating).replace('.','_'):'0_0');
-  const reviewBlock=d.reviews?`<div class="product-card_reviews mt-1"><img alt="Product Rating" class="ratingsStars" src="/ux/img/stars/rating-${ratingFile}.gif" /> <span> (${d.reviews}) </span></div>`:'';
-  return `<div class="product-card_content product-card_slider relative w-48 shrink-0">
+
+function previewHtml(d,i){
+  return `<div class="relative w-48 shrink-0">
     <span class="badge">${i+1}</span>${badge(d.badge)}
-    <div class="product-card_content_images mb-1"><a href="${full(d.link)}">${d.image?`<img src="${full(d.image)}" class="w-full h-28 object-cover bg-gray-200">`:'<div class="placeholder">No Image</div>'}</a></div>
-    <div class="product-card_content_description text-xs">
-      ${d.brand?`<p class="product-card_brand font-semibold">${d.brand}</p>`:''}
-      ${d.name?`<div class="product-card_name">${d.name}</div>`:''}
-      ${d.msrp?`<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike">${d.msrp}</span></div>`:''}
-      ${d.price?`<div class="product-card_price_regular">NEX Price <span>${d.price}</span></div>`:''}
-      ${reviewBlock}
+    <a href="${full(d.link)}">${d.image?`<img src="${full(d.image)}" class="w-full h-28 object-cover bg-gray-200">`:'<div class="placeholder">No Image</div>'}</a>
+    <div class="text-xs mt-1">
+      ${d.brand?`<p class="font-semibold">${d.brand}</p>`:''}
+      ${d.name?`<p>${d.name}</p>`:''}
+      ${d.msrp?`<p>Retail Price: ${d.msrp}</p>`:''}
+      ${d.price?`<p>NEX Price ${d.price}</p>`:''}
+      ${d.reviews?`<p>${ascii(d.rating)} (${d.reviews})</p>`:''}
     </div></div>`;
 }
+
+function exportHtml(d,i){
+  const file=(d.rating?String(d.rating).replace('.','_'):'0_0');
+  return `<div class="product-card_content product-card_slider relative">
+    <span class="badge">${i+1}</span>${badge(d.badge)}
+    <div class="product-card_content_images p-0 mb-3"><a href="${d.link}"><img src="${d.image}" /></a></div>
+    <div class="product-card_content_description">
+      ${d.brand?`<p class="product-card_brand"><a href="${d.link}">${d.brand}</a></p>`:''}
+      ${d.name?`<div class="product-card_name">${d.name}</div>`:''}
+      ${d.msrp?`<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> ${d.msrp} </span></div>`:''}
+      ${d.price?`<div class="product-card_price_regular">NEX Price <span> ${d.price} </span></div>`:''}
+      ${d.reviews?`<div class="product-card_reviews mt-1"><img alt="Product Rating" class="ratingsStars" src="/ux/img/stars/rating-${file}.gif" /> <span> (${d.reviews}) </span></div>`:''}
+    </div></div>`;
+}
+
 function build(){
   const list=gather();
-  preview.html(list.map(cardHtml).join(''));
-  exp.val('<div class="owl-carousel recently-viewed-carousel owl-theme">'+list.map(cardHtml).join('')+'</div>');
+  preview.html(list.map(previewHtml).join(''));
+  exp.val('<div class="owl-carousel recently-viewed-carousel owl-theme">'+list.map(exportHtml).join('')+'</div>');
 }
 
 $('#add').on('click',()=>addCard());
@@ -138,7 +152,7 @@ $("#importBtn").on("click",function(){
   if(!$blocks.length)return alert("No product-card_content blocks found.");
   cards.empty();
   $blocks.each(function(){
-    const $c=$(this);
+    const $c=$(this); const gif=$c.find(".ratingsStars").attr("src")||"";
     addCard({
       link:$c.find("a").attr("href")||"",
       image:$c.find("img").attr("src")||"",
@@ -148,7 +162,7 @@ $("#importBtn").on("click",function(){
       price:$c.find(".product-card_price_regular span").text().trim(),
       badge:($c.find(".promo-badge").text().trim()||"").toLowerCase().replace(" ","-"),
       reviews:($c.find(".product-card_reviews span").text().match(/\d+/)||[""])[0],
-      rating:(($c.find(".ratingsStars").attr("src")||"").match(/rating-(\d_\d|\d_0)/)||["",""])[1].replace("_",".")
+      rating:(gif.match(/rating-(\d_\d|\d_0)/)||["",""])[1].replace("_",".")
     });
   });
   renumber();build();
