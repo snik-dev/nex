@@ -2,58 +2,57 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MNE.com Carousel Generator</title>
+<title>MNE.com Carousel Builder</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={theme:{extend:{colors:{navy:'#002366',gold:'#ffc72c'}}}};</script>
+<style>
+.badge{position:absolute;top:6px;left:6px;background:#ffc72c;color:#002366;font-size:.75rem;font-weight:700;padding:2px 6px;border-radius:9999px}
+.promo-badge{position:absolute;top:6px;right:6px;background:#002366;color:#fff;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px}
+.placeholder{background:#e2e8f0;display:flex;align-items:center;justify-content:center;height:180px;font-size:.875rem;color:#6b7280}
+</style>
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
 
-<header class="bg-navy text-white p-4 flex flex-wrap items-center gap-4">
+<header class="bg-navy text-white p-4 flex flex-wrap gap-4 items-center justify-between">
   <h1 class="text-xl font-semibold">MNE.com Carousel Generator</h1>
-  <input id="csvFile" type="file" accept=".csv" class="text-xs bg-white text-navy rounded p-1">
-  <a href="https://snik-dev.github.io/nex/template.csv" target="_blank" class="underline text-xs">Download CSV template</a>
+  <div class="flex items-center gap-2">
+    <input id="csvFile" type="file" accept=".csv" class="text-xs bg-white text-navy rounded p-1">
+    <a href="https://snik-dev.github.io/nex/template.csv" target="_blank" class="underline text-xs">Download CSV template</a>
+  </div>
 </header>
 
-<main class="p-4 flex-1 flex flex-col gap-6 overflow-hidden">
+<main class="p-4 flex-1 flex flex-col gap-6 overflow-auto">
 
-  <div class="grid lg:grid-cols-[420px_1fr] gap-6 overflow-hidden flex-1">
+  <div class="space-y-4">
 
-    <div class="flex flex-col overflow-hidden">
-      <div class="mb-3"><label class="text-sm font-medium">Carousel Title</label><input id="title" class="w-full border rounded p-2"></div>
-
-      <div class="flex gap-3 flex-wrap text-sm mb-3">
-        <label class="flex items-center gap-1"><input type="checkbox" class="fieldToggle" value="brand" checked>Brand</label>
-        <label class="flex items-center gap-1"><input type="checkbox" class="fieldToggle" value="msrp" checked>MSRP</label>
-        <label class="flex items-center gap-1"><input type="checkbox" class="fieldToggle" value="price" checked>Price</label>
-        <label class="flex items-center gap-1"><input type="checkbox" class="fieldToggle" value="reviews" checked>Reviews</label>
-        <label class="flex items-center gap-1"><input type="checkbox" class="fieldToggle" value="badge" checked>Badge</label>
-      </div>
-
-      <div class="overflow-auto flex-1">
-        <table class="min-w-full text-xs whitespace-nowrap" id="grid">
-          <thead class="sticky top-0 bg-gray-200">
-            <tr><th class="w-6">#</th><th>Image</th><th>Name</th><th data-col="brand">Brand</th><th data-col="msrp">MSRP</th><th data-col="price">Price</th><th data-col="badge">Badge</th><th class="w-6"></th></tr>
-          </thead>
-          <tbody id="body"></tbody>
-        </table>
-      </div>
-
-      <button id="add" class="mt-3 bg-gold text-navy py-2 rounded shadow">Add Product (0/10)</button>
+    <div>
+      <label class="font-medium text-sm">Carousel Title (optional)</label>
+      <input id="title" class="w-full border rounded p-2">
     </div>
 
-    <div class="flex flex-col overflow-hidden">
-      <h2 class="font-semibold mb-2">Live Preview</h2>
-      <div id="preview" class="flex-1 border rounded p-2 overflow-auto bg-white"></div>
+    <div class="flex gap-4 flex-wrap text-sm">
+      <label class="flex items-center gap-1"><input type="checkbox" class="toggleGlobal" value="brand" checked>Brand</label>
+      <label class="flex items-center gap-1"><input type="checkbox" class="toggleGlobal" value="msrp" checked>MSRP</label>
+      <label class="flex items-center gap-1"><input type="checkbox" class="toggleGlobal" value="price" checked>Price</label>
+      <label class="flex items-center gap-1"><input type="checkbox" class="toggleGlobal" value="reviews" checked>Reviews</label>
+      <label class="flex items-center gap-1"><input type="checkbox" class="toggleGlobal" value="badge" checked>Badge</label>
     </div>
 
+    <div id="cards" class="space-y-6"></div>
+
+    <button id="add" class="bg-gold text-navy py-2 w-full rounded shadow">Add Product (0/10)</button>
   </div>
 
-  <details>
+  <div class="border rounded p-3 bg-white">
+    <h2 class="font-semibold mb-2">Live Preview</h2>
+    <div id="preview" class="owl-carousel"></div>
+  </div>
+
+  <details class="mt-6">
     <summary class="font-medium cursor-pointer">Generated / Import HTML</summary>
     <div class="grid lg:grid-cols-2 gap-4 mt-4">
       <div><textarea id="export" class="w-full h-48 border p-2 text-xs font-mono"></textarea><button id="copy" class="mt-1 bg-navy text-white px-3 py-1 rounded text-xs">Copy</button></div>
@@ -63,83 +62,61 @@
 
 </main>
 
-<table class="hidden"><tbody id="rowTpl">
-  <tr data-row>
-    <td class="idx text-center"></td>
-    <td><input data-f="image" class="border rounded p-1 w-28"></td>
-    <td><input data-f="name" class="border rounded p-1 w-40"></td>
-    <td data-col="brand"><input data-f="brand" class="border rounded p-1 w-32"></td>
-    <td data-col="msrp"><input data-f="msrp" class="border rounded p-1 w-20"></td>
-    <td data-col="price"><input data-f="price" class="border rounded p-1 w-20"></td>
-    <td data-col="badge">
-      <select data-f="badge" class="border rounded p-1">
-        <option value=""></option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option>
-      </select>
-    </td>
-    <td><button class="del text-red-600">✕</button></td>
-  </tr>
-</tbody></table>
+<template id="cardTemplate">
+<div data-card class="border bg-white rounded shadow p-4">
+  <div class="flex justify-between items-center mb-2">
+    <span class="font-semibold card-index">Product #</span>
+    <button class="del text-red-600">Remove</button>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-3">
+    <div class="col-span-2"><input data-f="link" class="border rounded p-2 w-full" placeholder="Product URL (relative ok)"></div>
+
+    <input data-f="image" class="border rounded p-2 w-full" placeholder="Image URL">
+    <input data-f="brand" class="border rounded p-2 w-full field-brand" placeholder="Brand">
+    <input data-f="name" class="border rounded p-2 w-full" placeholder="Name">
+    <input data-f="msrp" class="border rounded p-2 w-full field-msrp" placeholder="MSRP">
+    <input data-f="price" class="border rounded p-2 w-full field-price" placeholder="Price">
+    <input data-f="rating" type="number" step="0.5" min="0" max="5" class="border rounded p-2 w-full field-reviews" placeholder="Rating">
+    <input data-f="reviews" type="number" class="border rounded p-2 w-full field-reviews" placeholder="Review Count">
+    <select data-f="badge" class="border rounded p-2 w-full field-badge">
+      <option value="">No Badge</option><option value="clearance">Clearance</option><option value="last-chance">Last Chance</option><option value="new">New</option><option value="exclusive">NEX Exclusive</option>
+    </select>
+  </div>
+</div>
+</template>
 
 <script>
 const MAX=10,badgeTxt={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'};
-const body=$("#body"),rowTpl=$("#rowTpl tr");
-const preview=$("#preview"),exportTa=$("#export");
-const base="https://www.mynavyexchange.com";
-const rel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,'');
-const full=u=>u&&u[0]==='/'?base+u:u;
-const stars=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
+const cards=$("#cards"),cardTpl=$("#cardTemplate").html(),preview=$("#preview"),exportTA=$("#export");
+const base="https://www.mynavyexchange.com",rel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,''),
+full=u=>u&&u[0]==='/'?base+u:u,stars=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
 
-function addRow(data={}){
-  if(body.children().length>=MAX)return;
-  const row=rowTpl.clone();
-  Object.entries(data).forEach(([k,v])=>row.find(`[data-f=${k}]`).val(v));
-  body.append(row); renumber();
-}
+function renumber(){cards.children().each((i,c)=>$(c).find('.card-index').text('Product '+(i+1)));$("#add").text(`Add Product (${cards.children().length}/${MAX})`)}
+function addCard(){if(cards.children().length<MAX){cards.append(cardTpl);renumber();refresh()}}
 
-function renumber(){
-  body.children().each((i,r)=>{$(r).find('.idx').text(i+1)});
-  $("#add").text(`Add Product (${body.children().length}/${MAX})`);
-  build();
-}
+function data(){return cards.children().map((_,c)=>{const d={};$(c).find('[data-f]').each((__,el)=>d[$(el).data('f')]=$(el).val());d.link=rel(d.link||'');return d}).get()}
 
-function gather(){
-  const list=[];
-  body.children().each((_,r)=>{
-    const row=$(r),obj={};
-    row.find('[data-f]').each((__,el)=>obj[$(el).data('f')]=$(el).val());
-    obj.link=rel(obj.link||''); list.push(obj);
-  });
-  return list;
-}
-
-function card(d,i){
-  const img=d.image?`<img src="${full(d.image)}" class="w-full h-28 object-cover bg-gray-200">`:'';
+function badge(b){return b?`<span class="promo-badge">${badgeTxt[b]}</span>`:''}
+function cardHTML(d,i){
   return `<div class="product-card_content product-card_slider relative w-44">
-    <span class="badge">${i+1}</span>${d.badge?`<span class="promo-badge">${badgeTxt[d.badge]}</span>`:''}
-    <div class="product-card_content_images mb-1"><a href="${full(d.link||'')}">${img||'<div class="w-full h-28 bg-gray-200 flex items-center justify-center text-xs">No Image</div>'}</a></div>
-    <div class="product-card_content_description text-xs">
-      ${d.brand?`<p class="product-card_brand font-semibold">${d.brand}</p>`:''}
-      ${d.name?`<div class="product-card_name">${d.name}</div>`:''}
-      ${d.msrp?`<div class="product-card_price_msrp">Retail: <span class="product-card_price_msrp_strike">${d.msrp}</span></div>`:''}
-      ${d.price?`<div class="product-card_price_regular">NEX <span>${d.price}</span></div>`:''}
-      ${d.reviews?`<div class="product-card_reviews mt-1">${stars(d.rating)} (${d.reviews})</div>`:''}
-    </div></div>`;
+  <span class="badge">${i+1}</span>${badge(d.badge)}
+  <div class="product-card_content_images mb-1"><a href="${full(d.link)}">${d.image?`<img src="${full(d.image)}" class="w-full h-28 object-cover bg-gray-200">`:'<div class="placeholder">No Image</div>'}</a></div>
+  <div class="product-card_content_description text-xs">${d.brand?`<p class="font-semibold">${d.brand}</p>`:''}${d.name?`<p>${d.name}</p>`:''}${d.msrp?`<p>Retail: ${d.msrp}</p>`:''}${d.price?`<p>NEX: ${d.price}</p>`:''}${d.reviews?`<p>${stars(d.rating)} (${d.reviews})</p>`:''}</div></div>`;
 }
 
-function build(){
-  const data=gather(); preview.html(`<div class="owl-carousel"></div>`);
-  const oc=preview.find('.owl-carousel');
-  oc.append(data.map(card).join('')).owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,navText:['<span class="fas fa-chevron-left fa-2x"></span>','<span class="fas fa-chevron-right fa-2x"></span>'],dots:true,responsive:{0:{items:3,loop:true},361:{items:3,loop:data.length>1},571:{items:3,loop:data.length>2},721:{items:4,loop:data.length>3},857:{items:5,loop:data.length>4},993:{items:5,loop:data.length>5}}});
-  exportTa.val(preview.find('.owl-carousel').parent().html().trim());
+function buildPreview(){
+  const list=data();preview.trigger('destroy.owl.carousel').html(list.map(cardHTML).join('')).owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,dots:true,responsive:{0:{items:3},721:{items:4},993:{items:5}}});
+  exportTA.val(preview.parent().html().trim());
 }
 
-$("#add").on("click",()=>addRow());
-body.on("click",".del",e=>{$(e.target).closest("tr").remove();renumber()});
-body.on("input","input,select",build);
-$(".fieldToggle").on("change",function(){const c=$(this).val();$(`[data-col=${c}]`).toggleClass("hidden",!this.checked);build()});
-new Sortable(preview[0],{filter:'.owl-nav, .owl-dots',animation:150});
+$("#add").on("click",addCard);
+cards.on("click",".del",e=>{$(e.target).closest('[data-card]').remove();renumber();refresh()});
+cards.on("input","input,select",buildPreview);
+$(".toggleGlobal").on("change",function(){$(`.field-${this.value}`).toggle(this.checked);buildPreview()});
 
-addRow();
+function refresh(){buildPreview()}
+addCard();
 </script>
 </body>
 </html>
