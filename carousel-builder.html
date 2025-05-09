@@ -96,30 +96,29 @@ const rel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,''),
 full=u=>u&&u[0]==='/'?base+u:u,
 stars=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
 
-function addCard(obj={}){
+function addCard(o={}){
   if(cards.children().length>=MAX)return;
   const el=$(tpl).appendTo(cards);
-  Object.entries(obj).forEach(([k,v])=>el.find(`[data-f=${k}]`).val(v));
+  Object.entries(o).forEach(([k,v])=>el.find(`[data-f=${k}]`).val(v));
   cards.children('details').not(el).prop('open',false);
-  renumber(); build();
+  renumber();build();
 }
-function renumber(){
-  cards.children().each((i,e)=>$(e).find('.cardHead').text('Product '+(i+1)));
-  $('#add').text(`Add Product (${cards.children().length}/${MAX})`);
-}
-function gather(){
-  return cards.children().map((_,d)=>{
-    const o={};$(d).find('[data-f]').each((__,f)=>o[$(f).data('f')]=$(f).val());
-    o.link=rel(o.link||'');return o;
-  }).get();
-}
+function renumber(){cards.children().each((i,e)=>$(e).find('.cardHead').text('Product '+(i+1)));$('#add').text(`Add Product (${cards.children().length}/${MAX})`)}
+function gather(){return cards.children().map((_,d)=>{const o={};$(d).find('[data-f]').each((__,f)=>o[$(f).data('f')]=$(f).val());o.link=rel(o.link||'');return o}).get();}
 function badge(b){return b?`<span class="promo-badge">${badgeTxt[b]}</span>`:''}
 function cardHtml(d,i){
-  return `<div class="relative w-48 shrink-0">
+  const ratingFile=(d.rating?String(d.rating).replace('.','_'):'0_0');
+  const reviewBlock=d.reviews?`<div class="product-card_reviews mt-1"><img alt="Product Rating" class="ratingsStars" src="/ux/img/stars/rating-${ratingFile}.gif" /> <span> (${d.reviews}) </span></div>`:'';
+  return `<div class="product-card_content product-card_slider relative w-48 shrink-0">
     <span class="badge">${i+1}</span>${badge(d.badge)}
-    <a href="${full(d.link)}">${d.image?`<img src="${full(d.image)}" class="w-full h-28 object-cover bg-gray-200">`:'<div class="placeholder">No Image</div>'}</a>
-    <div class="text-xs mt-1">${d.brand?`<p class="font-semibold">${d.brand}</p>`:''}${d.name?`<p>${d.name}</p>`:''}${d.msrp?`<p>Retail: ${d.msrp}</p>`:''}${d.price?`<p>NEX: ${d.price}</p>`:''}${d.reviews?`<p>${stars(d.rating)} (${d.reviews})</p>`:''}</div>
-  </div>`;
+    <div class="product-card_content_images mb-1"><a href="${full(d.link)}">${d.image?`<img src="${full(d.image)}" class="w-full h-28 object-cover bg-gray-200">`:'<div class="placeholder">No Image</div>'}</a></div>
+    <div class="product-card_content_description text-xs">
+      ${d.brand?`<p class="product-card_brand font-semibold">${d.brand}</p>`:''}
+      ${d.name?`<div class="product-card_name">${d.name}</div>`:''}
+      ${d.msrp?`<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike">${d.msrp}</span></div>`:''}
+      ${d.price?`<div class="product-card_price_regular">NEX Price <span>${d.price}</span></div>`:''}
+      ${reviewBlock}
+    </div></div>`;
 }
 function build(){
   const list=gather();
@@ -133,40 +132,30 @@ cards.on('input','input,select',build);
 $('.toggle').on('change',function(){$(`.field-${this.value}`).toggle(this.checked);build()});
 new Sortable(preview[0],{animation:150,onEnd:e=>{const c=cards.children().eq(e.oldIndex).detach();e.newIndex===0?cards.prepend(c):cards.children().eq(e.newIndex).before(c);renumber();build();}});
 
-$("#importBtn").off().on("click", function () {
-  const raw = $("#importArea").val().trim();
-  if (!raw) return;
-
-  // tolerant HTML parse
-  const $tmp = $("<div>").html(raw);
-  const $cards = $tmp.find(".product-card_content");
-
-  if (!$cards.length) { alert("No product-card_content blocks found."); return; }
-
-  $("#cards").empty();
-
-  $cards.each(function () {
-    const $c = $(this);
-    const obj = {
-      link   : $c.find("a").attr("href") || "",
-      image  : $c.find("img").attr("src") || "",
-      brand  : $c.find(".product-card_brand").text().trim(),
-      name   : $c.find(".product-card_name").text().trim(),
-      msrp   : $c.find(".product-card_price_msrp_strike").text().trim(),
-      price  : $c.find(".product-card_price_regular span").text().trim(),
-      badge  : ($c.find(".promo-badge").text().trim() || "").toLowerCase().replace(" ","-"),
-      reviews: ($c.find(".product-card_reviews span").text().match(/\d+/)||[""])[0],
-      rating : (($c.find(".ratingsStars").attr("src")||"").match(/rating-(\d_\d|\d_0)/)||["",""])[1].replace("_",".")
-    };
-    addCard(obj);
+$("#importBtn").on("click",function(){
+  const raw=$("#importArea").val().trim();if(!raw)return;
+  const $tmp=$("<div>").html(raw),$blocks=$tmp.find(".product-card_content");
+  if(!$blocks.length)return alert("No product-card_content blocks found.");
+  cards.empty();
+  $blocks.each(function(){
+    const $c=$(this);
+    addCard({
+      link:$c.find("a").attr("href")||"",
+      image:$c.find("img").attr("src")||"",
+      brand:$c.find(".product-card_brand").text().trim(),
+      name:$c.find(".product-card_name").text().trim(),
+      msrp:$c.find(".product-card_price_msrp_strike").text().trim(),
+      price:$c.find(".product-card_price_regular span").text().trim(),
+      badge:($c.find(".promo-badge").text().trim()||"").toLowerCase().replace(" ","-"),
+      reviews:($c.find(".product-card_reviews span").text().match(/\d+/)||[""])[0],
+      rating:(($c.find(".ratingsStars").attr("src")||"").match(/rating-(\d_\d|\d_0)/)||["",""])[1].replace("_",".")
+    });
   });
-
-  renumber();
-  build();
+  renumber();build();
 });
-new Sortable(cards[0],{handle:'summary',animation:0});
 
 addCard();
+build();
 </script>
 </body>
 </html>
