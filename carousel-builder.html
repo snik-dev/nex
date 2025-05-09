@@ -133,30 +133,37 @@ cards.on('input','input,select',build);
 $('.toggle').on('change',function(){$(`.field-${this.value}`).toggle(this.checked);build()});
 new Sortable(preview[0],{animation:150,onEnd:e=>{const c=cards.children().eq(e.oldIndex).detach();e.newIndex===0?cards.prepend(c):cards.children().eq(e.newIndex).before(c);renumber();build();}});
 
-$("#importBtn").on("click",function(){
-  const html=$("#importArea").val().trim();
-  if(!html)return;
-  const doc=new DOMParser().parseFromString(html,"text/html");
-  const cardEls=doc.querySelectorAll(".product-card_content");
-  if(!cardEls.length){alert("No product-card_content blocks found.");return;}
-  cards.empty();
-  cardEls.forEach(el=>{
-    const obj={
-      link:el.querySelector("a")?.getAttribute("href")||"",
-      image:el.querySelector("img")?.getAttribute("src")||"",
-      brand:el.querySelector(".product-card_brand")?.textContent.trim()||"",
-      name:el.querySelector(".product-card_name")?.textContent.trim()||"",
-      msrp:el.querySelector(".product-card_price_msrp_strike")?.textContent.trim()||"",
-      price:el.querySelector(".product-card_price_regular span")?.textContent.trim()||"",
-      badge:el.querySelector(".promo-badge")?.textContent.trim().toLowerCase().replace(" ","-")||"",
-      reviews:el.querySelector(".product-card_reviews span")?.textContent.replace(/[()]/g,"").trim()||"",
-      rating:(()=>{const g=el.querySelector(".ratingsStars")?.getAttribute("src")||"";const m=g.match(/rating-(\d_\d|\d_0)/);return m?m[1].replace("_","."):"";})()
+$("#importBtn").off().on("click", function () {
+  const raw = $("#importArea").val().trim();
+  if (!raw) return;
+
+  // tolerant HTML parse
+  const $tmp = $("<div>").html(raw);
+  const $cards = $tmp.find(".product-card_content");
+
+  if (!$cards.length) { alert("No product-card_content blocks found."); return; }
+
+  $("#cards").empty();
+
+  $cards.each(function () {
+    const $c = $(this);
+    const obj = {
+      link   : $c.find("a").attr("href") || "",
+      image  : $c.find("img").attr("src") || "",
+      brand  : $c.find(".product-card_brand").text().trim(),
+      name   : $c.find(".product-card_name").text().trim(),
+      msrp   : $c.find(".product-card_price_msrp_strike").text().trim(),
+      price  : $c.find(".product-card_price_regular span").text().trim(),
+      badge  : ($c.find(".promo-badge").text().trim() || "").toLowerCase().replace(" ","-"),
+      reviews: ($c.find(".product-card_reviews span").text().match(/\d+/)||[""])[0],
+      rating : (($c.find(".ratingsStars").attr("src")||"").match(/rating-(\d_\d|\d_0)/)||["",""])[1].replace("_",".")
     };
     addCard(obj);
   });
-  renumber();build();
-});
 
+  renumber();
+  build();
+});
 new Sortable(cards[0],{handle:'summary',animation:0});
 
 addCard();
