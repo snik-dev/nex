@@ -28,6 +28,7 @@
 <main class="p-4 flex-1 flex flex-col gap-6 overflow-auto">
 
   <section class="space-y-4">
+
     <label class="block text-sm font-medium">Carousel Title (optional)
       <input id="title" class="mt-1 border rounded p-2 w-full">
     </label>
@@ -87,46 +88,77 @@
 </template>
 
 <script>
-const cards=$('#cards'),tpl=$('#cardTpl').html(),preview=$('#preview'),exp=$('#export'),MAX=10,
-badgeTxt={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'},
-base='https://www.mynavyexchange.com',rel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,''),
-full=u=>u&&u[0]==='/'?base+u:u,stars=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
+const MAX=10,badgeTxt={clearance:'Clearance','last-chance':'Last Chance',new:'New',exclusive:'NEX Exclusive'},
+base='https://www.mynavyexchange.com',cards=$("#cards"),tpl=$("#cardTpl").html(),
+preview=$("#preview"),exp=$("#export");
 
-function addCard(data={}){
+const rel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,''),
+full=u=>u&&u[0]==='/'?base+u:u,
+stars=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
+
+function addCard(obj={}){
   if(cards.children().length>=MAX)return;
   const el=$(tpl).appendTo(cards);
-  Object.entries(data).forEach(([k,v])=>el.find(`[data-f=${k}]`).val(v));
+  Object.entries(obj).forEach(([k,v])=>el.find(`[data-f=${k}]`).val(v));
   cards.children('details').not(el).prop('open',false);
   renumber(); build();
 }
-
 function renumber(){
   cards.children().each((i,e)=>$(e).find('.cardHead').text('Product '+(i+1)));
   $('#add').text(`Add Product (${cards.children().length}/${MAX})`);
 }
-
-function gather(){return cards.children().map((_,d)=>{const o={};$(d).find('[data-f]').each((__,f)=>o[$(f).data('f')]=$(f).val());o.link=rel(o.link||'');return o}).get()}
-
+function gather(){
+  return cards.children().map((_,d)=>{
+    const o={};$(d).find('[data-f]').each((__,f)=>o[$(f).data('f')]=$(f).val());
+    o.link=rel(o.link||'');return o;
+  }).get();
+}
+function badge(b){return b?`<span class="promo-badge">${badgeTxt[b]}</span>`:''}
 function cardHtml(d,i){
   return `<div class="relative w-48 shrink-0">
-    <span class="badge">${i+1}</span>${d.badge?`<span class="promo-badge">${badgeTxt[d.badge]}</span>`:''}
+    <span class="badge">${i+1}</span>${badge(d.badge)}
     <a href="${full(d.link)}">${d.image?`<img src="${full(d.image)}" class="w-full h-28 object-cover bg-gray-200">`:'<div class="placeholder">No Image</div>'}</a>
     <div class="text-xs mt-1">${d.brand?`<p class="font-semibold">${d.brand}</p>`:''}${d.name?`<p>${d.name}</p>`:''}${d.msrp?`<p>Retail: ${d.msrp}</p>`:''}${d.price?`<p>NEX: ${d.price}</p>`:''}${d.reviews?`<p>${stars(d.rating)} (${d.reviews})</p>`:''}</div>
   </div>`;
 }
-
 function build(){
   const list=gather();
   preview.html(list.map(cardHtml).join(''));
-  exp.val('<div class="owl-carousel recently-viewed-carousel owl-theme">'+
-    list.map(cardHtml).join('')+'</div>');
+  exp.val('<div class="owl-carousel recently-viewed-carousel owl-theme">'+list.map(cardHtml).join('')+'</div>');
 }
 
-$('#add').on('click',()=>{addCard()});
+$('#add').on('click',()=>addCard());
 cards.on('click','.remove',e=>{$(e.target).closest('details').remove();renumber();build()});
 cards.on('input','input,select',build);
 $('.toggle').on('change',function(){$(`.field-${this.value}`).toggle(this.checked);build()});
-new Sortable(preview[0],{animation:150,onEnd:e=>{const d=cards.children().eq(e.oldIndex).detach();if(e.newIndex===0)cards.prepend(d);else cards.children().eq(e.newIndex).before(d);renumber();build();}});
+new Sortable(preview[0],{animation:150,onEnd:e=>{const c=cards.children().eq(e.oldIndex).detach();e.newIndex===0?cards.prepend(c):cards.children().eq(e.newIndex).before(c);renumber();build();}});
+
+$("#importBtn").on("click",function(){
+  const html=$("#importArea").val().trim();
+  if(!html)return;
+  const doc=new DOMParser().parseFromString(html,"text/html");
+  const cardEls=doc.querySelectorAll(".product-card_content");
+  if(!cardEls.length){alert("No product-card_content blocks found.");return;}
+  cards.empty();
+  cardEls.forEach(el=>{
+    const obj={
+      link:el.querySelector("a")?.getAttribute("href")||"",
+      image:el.querySelector("img")?.getAttribute("src")||"",
+      brand:el.querySelector(".product-card_brand")?.textContent.trim()||"",
+      name:el.querySelector(".product-card_name")?.textContent.trim()||"",
+      msrp:el.querySelector(".product-card_price_msrp_strike")?.textContent.trim()||"",
+      price:el.querySelector(".product-card_price_regular span")?.textContent.trim()||"",
+      badge:el.querySelector(".promo-badge")?.textContent.trim().toLowerCase().replace(" ","-")||"",
+      reviews:el.querySelector(".product-card_reviews span")?.textContent.replace(/[()]/g,"").trim()||"",
+      rating:(()=>{const g=el.querySelector(".ratingsStars")?.getAttribute("src")||"";const m=g.match(/rating-(\d_\d|\d_0)/);return m?m[1].replace("_","."):"";})()
+    };
+    addCard(obj);
+  });
+  renumber();build();
+});
+
+new Sortable(cards[0],{handle:'summary',animation:0});
+
 addCard();
 </script>
 </body>
