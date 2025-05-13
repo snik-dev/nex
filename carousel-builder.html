@@ -10,7 +10,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <style>
 .badge{position:absolute;top:6px;left:6px;background:#ffc72c;color:#002366;font-size:.75rem;font-weight:700;padding:2px 6px;border-radius:9999px}
-.promo{position:absolute;top:6px;right:6px;background:#002366;color:#fff;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px}
 .placeholder{background:#e2e8f0;display:flex;align-items:center;justify-content:center;height:180px;font-size:.875rem;color:#6b7280}
 </style>
 </head>
@@ -34,8 +33,8 @@
     <div class="flex gap-4 flex-wrap text-sm">
       <label class="flex items-center gap-1"><input type="checkbox" class="toggle" value="brand" checked>Brand</label>
       <label class="flex items-center gap-1"><input type="checkbox" class="toggle" value="retail" checked>Retail</label>
-      <label class="flex items-center gap-1"><input type="checkbox" class="toggle" value="nex" checked>NEX Price</label>
-      <label class="flex items-center gap-1"><input type="checkbox" class="toggle" value="sale" checked>Sale Price</label>
+      <label class="flex items-center gap-1"><input type="checkbox" class="toggle" value="nex" checked>NEX&nbsp;Price</label>
+      <label class="flex items-center gap-1"><input type="checkbox" class="toggle" value="sale" checked>Sale&nbsp;Price</label>
       <label class="flex items-center gap-1"><input type="checkbox" class="toggle" value="reviews" checked>Reviews</label>
       <label class="flex items-center gap-1"><input type="checkbox" class="toggle" value="badge" checked>Badge</label>
     </div>
@@ -73,11 +72,11 @@
   <div class="p-3 grid md:grid-cols-2 gap-3">
     <input data-f="link"  placeholder="Product URL (relative ok)" class="border rounded p-2 col-span-2">
     <input data-f="image" placeholder="Image URL" class="border rounded p-2 col-span-2">
-    <input data-f="name"  placeholder="Name"  class="border rounded p-2">
-    <input data-f="brand" placeholder="Brand" class="border rounded p-2 field-brand">
+    <input data-f="name"  placeholder="Name"      class="border rounded p-2">
+    <input data-f="brand" placeholder="Brand"     class="border rounded p-2 field-brand">
     <input data-f="retail" placeholder="Retail"   class="border rounded p-2 field-retail">
     <input data-f="nex"   placeholder="NEX Price" class="border rounded p-2 field-nex">
-    <input data-f="sale"  placeholder="Sale Price" class="border rounded p-2 field-sale">
+    <input data-f="sale"  placeholder="Sale Price"class="border rounded p-2 field-sale">
     <input data-f="rating"  type="number" step="0.5" min="0" max="5" placeholder="Rating" class="border rounded p-2 field-reviews">
     <input data-f="reviews" type="number" placeholder="Review count" class="border rounded p-2 field-reviews">
     <select data-f="badge" class="border rounded p-2 field-badge">
@@ -89,11 +88,22 @@
 
 <script>
 const MAX=10,base='https://www.mynavyexchange.com',cards=$("#cards"),tpl=$("#tpl").html(),
-preview=$("#preview"),exp=$("#export"),
-rel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,''),
+preview=$("#preview"),exp=$("#export");
+
+const rel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,''),
 full=u=>u&&u[0]==='/'?base+u:u,
-ascii=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s},
-badgeHTML=t=>t?`<span class="promo">${t}</span>`:'';
+ascii=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
+
+function badgeHTML(t){
+  if(!t) return '';
+  const css={
+    'Clearance':'background:#ffc72c;color:#002366',
+    'Last Chance':'background:#b91c1c;color:#fff',
+    'New':'background:#002366;color:#fff',
+    'NEX Exclusive':'background:#002366;color:#fff'
+  }[t]||'background:#002366;color:#fff';
+  return `<span style="${css};position:absolute;top:6px;right:6px;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px">${t}</span>`;
+}
 
 function add(o={}){if(cards.children().length>=MAX)return;const el=$(tpl).appendTo(cards);for(const[k,v]of Object.entries(o))el.find(`[data-f=${k}]`).val(v);cards.children('details').not(el).prop('open',false);renumber();build();}
 function renumber(){cards.children().each((i,e)=>$(e).find('.idx').text('Product '+(i+1)));$('#add').text(`Add Product (${cards.children().length}/${MAX})`)}
@@ -160,15 +170,7 @@ $("#importBtn").on("click",function(){
       retail:$c.find(".product-card_price_msrp_strike").text().trim(),
       nex:$c.find(".product-card_price_regular span").first().text().trim(),
       sale:$c.find(".product-card_price_regular[style*=color] span").text().trim(),
-      badge:$c.find(".promo").text().trim(),
+      badge:$c.find("span").first().text().trim(),
       reviews:($c.find(".product-card_reviews span").text().match(/\d+/)||[""])[0],
       rating:(gif.match(/rating-(\d_\d|\d_0)/)||["",""])[1].replace("_",".")
     });
-  });
-  renumber();build();
-});
-
-add();build();
-</script>
-</body>
-</html>
