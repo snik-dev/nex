@@ -19,7 +19,7 @@
 <header class="bg-navy text-white p-4 flex flex-wrap items-center gap-4 justify-between">
   <h1 class="text-lg font-semibold">MNE.com Carousel Generator</h1>
   <label class="text-xs flex items-center gap-2">Bulk CSV Upload
-    <input type="file" id="csv" accept=".csv" class="bg-white text-navy rounded p-1">
+    <input id="csv" type="file" accept=".csv" class="bg-white text-navy rounded p-1">
     <a href="https://snik-dev.github.io/nex/template.csv" class="underline">template</a>
   </label>
 </header>
@@ -73,11 +73,11 @@
   <div class="p-3 grid md:grid-cols-2 gap-3">
     <input data-f="link"  placeholder="Product URL (relative ok)" class="border rounded p-2 col-span-2">
     <input data-f="image" placeholder="Image URL" class="border rounded p-2 col-span-2">
-    <input data-f="name"  placeholder="Name"      class="border rounded p-2">
-    <input data-f="brand" placeholder="Brand"     class="border rounded p-2 field-brand">
+    <input data-f="name"  placeholder="Name"  class="border rounded p-2">
+    <input data-f="brand" placeholder="Brand" class="border rounded p-2 field-brand">
     <input data-f="retail" placeholder="Retail"   class="border rounded p-2 field-retail">
     <input data-f="nex"   placeholder="NEX Price" class="border rounded p-2 field-nex">
-    <input data-f="sale"  placeholder="Sale Price"class="border rounded p-2 field-sale">
+    <input data-f="sale"  placeholder="Sale Price" class="border rounded p-2 field-sale">
     <input data-f="rating"  type="number" step="0.5" min="0" max="5" placeholder="Rating" class="border rounded p-2 field-reviews">
     <input data-f="reviews" type="number" placeholder="Review count" class="border rounded p-2 field-reviews">
     <select data-f="badge" class="border rounded p-2 field-badge">
@@ -95,7 +95,7 @@ full=u=>u&&u[0]==='/'?base+u:u,
 ascii=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s},
 badgeHTML=t=>t?`<span class="promo">${t}</span>`:'';
 
-function add(o={}){if(cards.children().length>=MAX)return;const el=$(tpl).appendTo(cards);Object.entries(o).forEach(([k,v])=>el.find(`[data-f=${k}]`).val(v));cards.children('details').not(el).prop('open',false);renumber();build();}
+function add(o={}){if(cards.children().length>=MAX)return;const el=$(tpl).appendTo(cards);for(const[k,v]of Object.entries(o))el.find(`[data-f=${k}]`).val(v);cards.children('details').not(el).prop('open',false);renumber();build();}
 function renumber(){cards.children().each((i,e)=>$(e).find('.idx').text('Product '+(i+1)));$('#add').text(`Add Product (${cards.children().length}/${MAX})`)}
 function gather(){return cards.children().map((_,d)=>{const o={};$(d).find('[data-f]').each((__,f)=>o[$(f).data('f')]=$(f).val());o.link=rel(o.link||'');return o}).get();}
 
@@ -148,7 +148,7 @@ new Sortable(preview[0],{animation:150,onEnd:e=>{const r=cards.children().eq(e.o
 $("#importBtn").on("click",function(){
   const raw=$("#importArea").val().trim();if(!raw)return;
   const $tmp=$("<div>").html(raw),$b=$tmp.find(".product-card_content");
-  if(!$b.length)return alert("No product-card_content blocks found.");
+  if(!$b.length){alert("No product-card_content blocks found.");return;}
   cards.empty();
   $b.each(function(){
     const $c=$(this),gif=$c.find(".ratingsStars").attr("src")||"";
@@ -158,4 +158,17 @@ $("#importBtn").on("click",function(){
       brand:$c.find(".product-card_brand").text().trim(),
       name:$c.find(".product-card_name").text().trim(),
       retail:$c.find(".product-card_price_msrp_strike").text().trim(),
-      nex:$c.find(".product-card_price_regular
+      nex:$c.find(".product-card_price_regular span").first().text().trim(),
+      sale:$c.find(".product-card_price_regular[style*=color] span").text().trim(),
+      badge:$c.find(".promo").text().trim(),
+      reviews:($c.find(".product-card_reviews span").text().match(/\d+/)||[""])[0],
+      rating:(gif.match(/rating-(\d_\d|\d_0)/)||["",""])[1].replace("_",".")
+    });
+  });
+  renumber();build();
+});
+
+add();build();
+</script>
+</body>
+</html>
