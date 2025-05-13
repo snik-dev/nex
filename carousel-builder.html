@@ -45,6 +45,7 @@
   </section>
 
   <section class="border rounded p-3 bg-white">
+    <div id="prevTitle" class="font-semibold text-lg mb-2"></div>
     <h2 class="font-semibold mb-2">Live Preview <span class="text-xs text-gray-600">(drag to reorder)</span></h2>
     <div id="preview" class="flex gap-4 overflow-x-auto"></div>
   </section>
@@ -87,59 +88,31 @@
 </template>
 
 <script>
-const MAX=10,base='https://www.mynavyexchange.com',badgeColor='#002366',
-cards=$("#cards"),tpl=$("#tpl").html(),preview=$("#preview"),exp=$("#export"),
-badgeHTML=t=>t?`<span class="promo" style="background:${badgeColor}">${t}</span>`:'',
-rel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,''),
-full=u=>u&&u[0]==='/'?base+u:u,
-star=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
+const MAX=10,base='https://www.mynavyexchange.com',cards=$("#cards"),tpl=$("#tpl").html(),preview=$("#preview"),exp=$("#export"),
+badgeHTML=t=>t?`<span class="promo">${t}</span>`:'',rel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,''),
+full=u=>u&&u[0]==='/'?base+u:u,ascii=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
 
-function add(o={}){
- if(cards.children().length>=MAX)return;
- const el=$(tpl).appendTo(cards);
- Object.entries(o).forEach(([k,v])=>el.find(`[data-f=${k}]`).val(v));
- cards.children('details').not(el).prop('open',false); renumber(); build();
-}
+function add(o={}){if(cards.children().length>=MAX)return;const el=$(tpl).appendTo(cards);Object.entries(o).forEach(([k,v])=>el.find(`[data-f=${k}]`).val(v));cards.children('details').not(el).prop('open',false);renumber();build();}
 function renumber(){cards.children().each((i,e)=>$(e).find('.idx').text('Product '+(i+1)));$('#add').text(`Add Product (${cards.children().length}/${MAX})`)}
 function gather(){return cards.children().map((_,d)=>{const o={};$(d).find('[data-f]').each((__,f)=>o[$(f).data('f')]=$(f).val());o.link=rel(o.link||'');return o}).get();}
-
-function prevCard(d,i){
- const sale=!!d.sale;
- const retailLine=d.retail&&(!sale||d.retail)?`<p${sale?' style="text-decoration:line-through"':''}>Retail Price: ${d.retail}</p>`:'';
- const nexLine=d.nex?`<p${sale?' style="text-decoration:line-through"':''}>NEX Price ${d.nex}</p>`:'';
- const saleLine=sale?`<p style="color:red">${d.sale}</p>`:'';
- return `<div class="relative w-48 shrink-0">
-   <span class="badge">${i+1}</span>${badgeHTML(d.badge)}
-   <a href="${full(d.link)}">${d.image?`<img src="${full(d.image)}" class="w-full h-28 object-cover bg-gray-200">`:'<div class="placeholder">No Image</div>'}</a>
-   <div class="text-xs mt-1">
-     ${d.brand?`<p class="font-semibold">${d.brand}</p>`:''}
-     ${d.name?`<p>${d.name}</p>`:''}
-     ${retailLine}${nexLine}${saleLine}
-     ${d.reviews?`<p>${star(d.rating)} (${d.reviews})</p>`:''}
-   </div></div>`;
+function prevCard(d){
+ const sale=!!d.sale,retail=d.retail?`<p${sale?' style="text-decoration:line-through"':''}>Retail Price: ${d.retail}</p>`:'',
+ nex=d.nex?`<p${sale?' style="text-decoration:line-through"':''}>NEX Price ${d.nex}</p>`:'',saleL=sale?`<p style="color:red">${d.sale}</p>`:'';
+ return `<div class="relative w-48 shrink-0">${badgeHTML(d.badge)}
+  <a href="${full(d.link)}">${d.image?`<img src="${full(d.image)}" class="w-full h-28 object-cover bg-gray-200">`:'<div class="placeholder">No Image</div>'}</a>
+  <div class="text-xs mt-1">${d.brand?`<p class="font-semibold">${d.brand}</p>`:''}${d.name?`<p>${d.name}</p>`:''}${retail}${nex}${saleL}${d.reviews?`<p>${ascii(d.rating)} (${d.reviews})</p>`:''}</div></div>`;
 }
-
-function outCard(d){
- const file=(d.rating?String(d.rating).replace('.','_'):'0_0'),sale=!!d.sale,
- retailLine=d.retail?`<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike"> ${d.retail} </span></div>`:'',
- nexLine=d.nex?`<div class="product-card_price_regular">NEX Price <span${sale?' style="text-decoration:line-through"':''}> ${d.nex} </span></div>`:'',
- saleLine=sale?`<div class="product-card_price_regular" style="color:red"><span> ${d.sale} </span></div>`:'';
- return `<div class="product-card_content product-card_slider relative">
-   ${badgeHTML(d.badge)}
-   <div class="product-card_content_images p-0 mb-3"><a href="${d.link}"><img src="${d.image}"/></a></div>
-   <div class="product-card_content_description">
-     ${d.brand?`<p class="product-card_brand"><a href="${d.link}">${d.brand}</a></p>`:''}
-     ${d.name?`<div class="product-card_name">${d.name}</div>`:''}
-     ${retailLine}${nexLine}${saleLine}
-     ${d.reviews?`<div class="product-card_reviews mt-1"><img class="ratingsStars" alt="Product Rating" src="/ux/img/stars/rating-${file}.gif"/> <span> (${d.reviews}) </span></div>`:''}
-   </div></div>`;}
-
-const owlScript=`<script>$(document).ready(function(){const c=$(".recently-viewed-carousel"),n=c[0].children.length;c.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,navText:['<span class=&quot;fas fa-chevron-left fa-2x&quot;></span>','<span class=&quot;fas fa-chevron-right fa-2x&quot;></span>'],dots:true,responsive:{0:{items:3,loop:true},361:{items:3,loop:n>1},571:{items:3,loop:n>2},721:{items:4,loop:n>3},857:{items:5,loop:n>4},993:{items:5,loop:n>5}}});});<\/script>`;
-
+function outCard(d){const file=(d.rating?String(d.rating).replace('.','_'):'0_0'),sale=!!d.sale,retail=d.retail?`<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike">${d.retail}</span></div>`:'',nex=d.nex?`<div class="product-card_price_regular">NEX Price <span${sale?' style="text-decoration:line-through"':''}>${d.nex}</span></div>`:'',saleL=sale?`<div class="product-card_price_regular" style="color:red"><span>${d.sale}</span></div>`:'';
+ return `<div class="product-card_content product-card_slider relative">${badgeHTML(d.badge)}
+  <div class="product-card_content_images p-0 mb-3"><a href="${d.link}"><img src="${d.image}"/></a></div>
+  <div class="product-card_content_description">${d.brand?`<p class="product-card_brand"><a href="${d.link}">${d.brand}</a></p>`:''}${d.name?`<div class="product-card_name">${d.name}</div>`:''}${retail}${nex}${saleL}${d.reviews?`<div class="product-card_reviews mt-1"><img class="ratingsStars" src="/ux/img/stars/rating-${file}.gif"> <span>(${d.reviews})</span></div>`:''}</div></div>`;
+}
+const owl=`<script>$(document).ready(function(){const c=$('.recently-viewed-carousel'),n=c[0].children.length;c.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,navText:['<span class=&quot;fas fa-chevron-left fa-2x&quot;></span>','<span class=&quot;fas fa-chevron-right fa-2x&quot;></span>'],dots:true,responsive:{0:{items:3,loop:true},361:{items:3,loop:n>1},571:{items:3,loop:n>2},721:{items:4,loop:n>3},857:{items:5,loop:n>4},993:{items:5,loop:n>5}}});});<\/script>`;
 function build(){
- const list=gather();
+ const list=gather(),t=$("#title").val().trim();
+ $("#prevTitle").text(t);
  preview.html(list.map(prevCard).join(''));
- exp.val('<div class="sg-content col-12 row no-gutters"><div class="sg-content-item col-12 row align-items-center mx-0 my-4"><div class="owl-carousel recently-viewed-carousel owl-theme">'+list.map(outCard).join('')+'</div></div></div>'+owlScript);
+ exp.val('<div class="sg-content col-12 row no-gutters"><div class="sg-content-item col-12 row align-items-center mx-0 my-4">'+(t?`<h3 class="col-12 bold mb-4" style="font-size:18px;">${t}</h3>`:'')+'<div class="owl-carousel recently-viewed-carousel owl-theme">'+list.map(outCard).join('')+'</div></div></div>'+owl);
 }
 
 $('#add').on('click',()=>add());
@@ -147,7 +120,7 @@ cards.on('click','.del',e=>{$(e.target).closest('[data-card]').remove();renumber
 cards.on('input','input,select',build);
 $('.toggle').on('change',function(){$(`.field-${this.value}`).toggle(this.checked);build()});
 new Sortable(preview[0],{animation:150,onEnd:e=>{const r=cards.children().eq(e.oldIndex).detach();e.newIndex===0?cards.prepend(r):cards.children().eq(e.newIndex).before(r);renumber();build();}});
-$("#importBtn").on("click",function(){const raw=$("#importArea").val().trim();if(!raw)return;const $tmp=$("<div>").html(raw),$b=$tmp.find(".product-card_content");if(!$b.length)return alert("No product-card_content blocks found.");cards.empty();$b.each(function(){const $c=$(this);const gif=$c.find(".ratingsStars").attr("src")||"";add({link:$c.find("a").attr("href")||"",image:$c.find("img").attr("src")||"",brand:$c.find(".product-card_brand").text().trim(),name:$c.find(".product-card_name").text().trim(),retail:$c.find(".product-card_price_msrp_strike").text().trim(),nex:$c.find(".product-card_price_regular span").first().text().trim(),sale:$c.find(".product-card_price_regular span").last().text().trim(),badge:($c.find(".promo").text().trim()||"").replace(" "," "),reviews:($c.find(".product-card_reviews span").text().match(/\d+/)||[""])[0],rating:(gif.match(/rating-(\d_\d|\d_0)/)||["",""])[1].replace("_",".")});});renumber();build();});
+$("#importBtn").on("click",function(){const raw=$("#importArea").val().trim();if(!raw)return;const $tmp=$("<div>").html(raw),$b=$tmp.find(".product-card_content");if(!$b.length)return alert("No product-card_content blocks found.");cards.empty();$b.each(function(){const $c=$(this),gif=$c.find(".ratingsStars").attr("src")||"";add({link:$c.find("a").attr("href")||"",image:$c.find("img").attr("src")||"",brand:$c.find(".product-card_brand").text().trim(),name:$c.find(".product-card_name").text().trim(),retail:$c.find(".product-card_price_msrp_strike").text().trim(),nex:$c.find(".product-card_price_regular span").first().text().trim(),sale:$c.find(".product-card_price_regular span").last().text().trim(),badge:$c.find(".promo").text().trim(),reviews:($c.find(".product-card_reviews span").text().match(/\d+/)||[""])[0],rating:(gif.match(/rating-(\d_\d|\d_0)/)||["",""])[1].replace("_",".")});});renumber();build();});
 add();build();
 </script>
 </body>
