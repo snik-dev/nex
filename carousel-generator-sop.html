@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MNE.com Carousel Builder – SOP</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{navy:'#002366',gold:'#ffc72c'}}}};</script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+<header class="bg-navy text-white p-4">
+  <h1 class="text-xl font-semibold">Standard-Operating Procedure<br>MNE.com Carousel Builder</h1>
+</header>
+
+<main class="p-6 space-y-8 text-sm leading-6">
+
+  <section>
+    <h2 class="text-lg font-semibold mb-2">1. Getting started</h2>
+    <ol class="list-decimal list-inside space-y-1">
+      <li>Open <span class="text-navy font-medium">carousel-builder.html</span> in Chrome.</li>
+      <li>(Optional) paste a <span class="font-medium">Carousel Title</span>; it renders as the blue headline on site.</li>
+      <li>Review the global field toggles: <span class="italic">Retail, NEX Price, Sale Price, Reviews, Badge, Brand</span>.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-2">2. Adding individual products</h2>
+    <ol class="list-decimal list-inside space-y-1">
+      <li>Click <span class="bg-gold text-navy px-1 py-0.5 rounded">Add Product</span>.  
+          A card opens with editable inputs.</li>
+      <li>Fill <span class="font-medium">Product URL</span> (relative OK), <span class="font-medium">Image URL</span>,
+          and any optional fields.<br>
+          <span class="text-gray-600">• When <em>Sale Price</em> is present, Retail&nbsp;and NEX values will auto-strike and the sale displays red.</span></li>
+      <li>Collapse a card by clicking its title row; only one card stays open to keep the page tidy.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-2">3. Bulk CSV upload</h2>
+    <ol class="list-decimal list-inside space-y-1">
+      <li>Click <span class="bg-white border px-2 py-0.5 rounded">Bulk CSV Upload</span> in the blue header.</li>
+      <li>Select a file that matches the
+          <a href="https://snik-dev.github.io/nex/template.csv" class="underline text-navy">template</a> column order.</li>
+      <li>Rows import instantly; edit any cell before export.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-2">4. Importing existing HTML</h2>
+    <ol class="list-decimal list-inside space-y-1">
+      <li>Paste legacy snippet into the <span class="font-medium">Paste HTML to Import</span> box.</li>
+      <li>Click <span class="bg-navy text-white px-2 py-0.5 rounded">Import</span>.  
+          Builder extracts brand, prices, rating GIF, reviews, badge, and images.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-2">5. Live preview &amp; re-ordering</h2>
+    <ul class="list-disc list-inside space-y-1">
+      <li>Preview updates in real-time with ★/☆ rating symbols.</li>
+      <li>Drag a preview tile to change order; form rows sync automatically.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-2">6. Generating the embed code</h2>
+    <ol class="list-decimal list-inside space-y-1">
+      <li>Scroll to <span class="font-medium">Generated HTML</span>.</li>
+      <li>Click anywhere, press <kbd>Ctrl / Cmd +A</kbd> then <kbd>Ctrl / Cmd +C</kbd> – or highlight and copy.</li>
+      <li>Paste directly into the CMS module.  
+          The block already contains the Owl Carousel init script.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-2">7. Quick tips</h2>
+    <ul class="list-disc list-inside space-y-1">
+      <li>Max 10 items per carousel.</li>
+      <li>Image URLs must point to the <code>/products/images/small/</code> path for proper CDN sizing.</li>
+      <li>Promo badge text follows: <em>Clearance · Last Chance · New · NEX Exclusive</em>.</li>
+      <li>You can reorder via keyboard: <kbd>Ctrl / Cmd + ↑ / ↓</kbd> when a card header is focused.</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="text-center text-gray-500 text-xs py-4">
+  © 2025 Navy Exchange Service Command · For internal merchandising use only
+</footer>
+
+</body>
+</html>
