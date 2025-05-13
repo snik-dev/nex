@@ -14,7 +14,6 @@
 </style>
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
-
 <header class="bg-navy text-white p-4 flex flex-wrap items-center gap-4 justify-between">
   <h1 class="text-lg font-semibold">MNE.com Carousel Generator</h1>
   <label class="text-xs flex items-center gap-2">Bulk CSV Upload
@@ -22,14 +21,11 @@
     <a href="https://snik-dev.github.io/nex/template.csv" class="underline">template</a>
   </label>
 </header>
-
 <main class="p-4 flex-1 flex flex-col gap-6 overflow-auto">
-
   <section class="space-y-4">
     <label class="block text-sm font-medium">Carousel Title (optional)
       <input id="title" class="mt-1 border rounded p-2 w-full">
     </label>
-
     <div class="flex gap-4 flex-wrap text-sm">
       <label class="flex items-center gap-1"><input type="checkbox" class="toggle" value="brand" checked>Brand</label>
       <label class="flex items-center gap-1"><input type="checkbox" class="toggle" value="retail" checked>Retail</label>
@@ -38,17 +34,14 @@
       <label class="flex items-center gap-1"><input type="checkbox" class="toggle" value="reviews" checked>Reviews</label>
       <label class="flex items-center gap-1"><input type="checkbox" class="toggle" value="badge" checked>Badge</label>
     </div>
-
     <div id="cards" class="space-y-4"></div>
     <button id="add" class="bg-gold text-navy w-full py-2 rounded shadow">Add Product (0/10)</button>
   </section>
-
   <section class="border rounded p-3 bg-white">
     <div id="prevTitle" class="font-semibold text-lg mb-2"></div>
     <h2 class="font-semibold mb-2">Live Preview <span class="text-xs text-gray-600">(drag to reorder)</span></h2>
     <div id="preview" class="flex gap-4 overflow-x-auto"></div>
   </section>
-
   <section class="grid lg:grid-cols-2 gap-4">
     <div>
       <h2 class="font-semibold mb-1 text-sm">Generated HTML</h2>
@@ -60,9 +53,7 @@
       <button id="importBtn" class="mt-1 bg-navy text-white px-3 py-1 rounded text-xs">Import</button>
     </div>
   </section>
-
 </main>
-
 <template id="tpl">
 <details open data-card class="border bg-white rounded shadow">
   <summary class="cursor-pointer select-none flex justify-between items-center p-3">
@@ -72,11 +63,11 @@
   <div class="p-3 grid md:grid-cols-2 gap-3">
     <input data-f="link"  placeholder="Product URL (relative ok)" class="border rounded p-2 col-span-2">
     <input data-f="image" placeholder="Image URL" class="border rounded p-2 col-span-2">
-    <input data-f="name"  placeholder="Name"      class="border rounded p-2">
-    <input data-f="brand" placeholder="Brand"     class="border rounded p-2 field-brand">
-    <input data-f="retail" placeholder="Retail"   class="border rounded p-2 field-retail">
+    <input data-f="name"  placeholder="Name" class="border rounded p-2">
+    <input data-f="brand" placeholder="Brand" class="border rounded p-2 field-brand">
+    <input data-f="retail" placeholder="Retail" class="border rounded p-2 field-retail">
     <input data-f="nex"   placeholder="NEX Price" class="border rounded p-2 field-nex">
-    <input data-f="sale"  placeholder="Sale Price"class="border rounded p-2 field-sale">
+    <input data-f="sale"  placeholder="Sale Price" class="border rounded p-2 field-sale">
     <input data-f="rating"  type="number" step="0.5" min="0" max="5" placeholder="Rating" class="border rounded p-2 field-reviews">
     <input data-f="reviews" type="number" placeholder="Review count" class="border rounded p-2 field-reviews">
     <select data-f="badge" class="border rounded p-2 field-badge">
@@ -85,92 +76,26 @@
   </div>
 </details>
 </template>
-
 <script>
-const MAX=10,base='https://www.mynavyexchange.com',cards=$("#cards"),tpl=$("#tpl").html(),
-preview=$("#preview"),exp=$("#export");
-
-const rel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,''),
-full=u=>u&&u[0]==='/'?base+u:u,
-ascii=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
-
-function badgeHTML(t){
-  if(!t) return '';
-  const css={
-    'Clearance':'background:#ffc72c;color:#002366',
-    'Last Chance':'background:#b91c1c;color:#fff',
-    'New':'background:#002366;color:#fff',
-    'NEX Exclusive':'background:#002366;color:#fff'
-  }[t]||'background:#002366;color:#fff';
-  return `<span style="${css};position:absolute;top:6px;right:6px;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px">${t}</span>`;
-}
-
-function add(o={}){if(cards.children().length>=MAX)return;const el=$(tpl).appendTo(cards);for(const[k,v]of Object.entries(o))el.find(`[data-f=${k}]`).val(v);cards.children('details').not(el).prop('open',false);renumber();build();}
+const MAX=10,base='https://www.mynavyexchange.com',cards=$("#cards"),tpl=$("#tpl").html(),preview=$("#preview"),exp=$("#export");
+const rel=u=>u.replace(/^https?:\/\/www\.mynavyexchange\.com/,'');
+const full=u=>u&&u[0]==='/'?base+u:u;
+const ascii=v=>{v=parseFloat(v)||0;let s='';for(let i=1;i<=5;i++)s+=v>=i?'★':v>=i-.5?'½':'☆';return s};
+function badgeHTML(t){if(!t)return'';const css={'Clearance':'background:#ffc72c;color:#002366','Last Chance':'background:#b91c1c;color:#fff','New':'background:#002366;color:#fff','NEX Exclusive':'background:#002366;color:#fff'}[t]||'background:#002366;color:#fff';return`<span style="${css};position:absolute;top:6px;right:6px;font-size:.625rem;font-weight:700;padding:2px 6px;border-radius:4px">${t}</span>`}
+function add(o={}){if(cards.children().length>=MAX)return;const el=$(tpl).appendTo(cards);for(const[k,v]of Object.entries(o))el.find(`[data-f=${k}]`).val(v);cards.children('details').not(el).prop('open',false);renumber();build()}
 function renumber(){cards.children().each((i,e)=>$(e).find('.idx').text('Product '+(i+1)));$('#add').text(`Add Product (${cards.children().length}/${MAX})`)}
 function gather(){return cards.children().map((_,d)=>{const o={};$(d).find('[data-f]').each((__,f)=>o[$(f).data('f')]=$(f).val());o.link=rel(o.link||'');return o}).get();}
-
-function prevCard(d){
- const sale=!!d.sale;
- return `<div class="relative w-48 shrink-0">
-   ${badgeHTML(d.badge)}
-   <a href="${full(d.link)}">${d.image?`<img src="${full(d.image)}" class="w-full h-28 object-cover bg-gray-200">`:'<div class="placeholder">No Image</div>'}</a>
-   <div class="text-xs mt-1">
-     ${d.brand?`<p class="font-semibold">${d.brand}</p>`:''}
-     ${d.name?`<p>${d.name}</p>`:''}
-     ${d.retail?`<p${sale?' style="text-decoration:line-through"':''}>Retail Price: ${d.retail}</p>`:''}
-     ${d.nex?`<p${sale?' style="text-decoration:line-through"':''}>NEX Price ${d.nex}</p>`:''}
-     ${sale?`<p style="color:#d61919">${d.sale}</p>`:''}
-     ${d.reviews?`<p>${ascii(d.rating)} (${d.reviews})</p>`:''}
-   </div></div>`;
-}
-
-function exportCard(d){
- const file=(d.rating?String(d.rating).replace('.','_'):'0_0'),sale=!!d.sale,
- retail=d.retail?`<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike">${d.retail}</span></div>`:'',
- nex=d.nex?`<div class="product-card_price_regular"${sale?' style="text-decoration:line-through"':''}>NEX Price <span>${d.nex}</span></div>`:'',
- saleLine=sale?`<div class="product-card_price_regular" style="color:#d61919"><span>${d.sale}</span></div>`:'';
- return `<div class="product-card_content product-card_slider relative">
-   ${badgeHTML(d.badge)}
-   <div class="product-card_content_images p-0 mb-3"><a href="${d.link}"><img src="${d.image}"></a></div>
-   <div class="product-card_content_description">
-     ${d.brand?`<p class="product-card_brand"><a href="${d.link}">${d.brand}</a></p>`:''}
-     ${d.name?`<div class="product-card_name">${d.name}</div>`:''}
-     ${retail}${nex}${saleLine}
-     ${d.reviews?`<div class="product-card_reviews mt-1"><img class="ratingsStars" src="/ux/img/stars/rating-${file}.gif"> <span>(${d.reviews})</span></div>`:''}
-   </div></div>`;
-}
-
+function prevCard(d){const sale=!!d.sale;return`<div class="relative w-48 shrink-0">${badgeHTML(d.badge)}<a href="${full(d.link)}">${d.image?`<img src="${full(d.image)}" class="w-full h-28 object-cover bg-gray-200">`:'<div class="placeholder">No Image</div>'}</a><div class="text-xs mt-1">${d.brand?`<p class="font-semibold">${d.brand}</p>`:''}${d.name?`<p>${d.name}</p>`:''}${d.retail?`<p${sale?' style="text-decoration:line-through"':''}>Retail Price: ${d.retail}</p>`:''}${d.nex?`<p${sale?' style="text-decoration:line-through"':''}>NEX Price ${d.nex}</p>`:''}${sale?`<p style="color:#d61919">${d.sale}</p>`:''}${d.reviews?`<p>${ascii(d.rating)} (${d.reviews})</p>`:''}</div></div>`}
+function exportCard(d){const file=(d.rating?String(d.rating).replace('.','_'):'0_0'),sale=!!d.sale,retail=d.retail?`<div class="product-card_price_msrp">Retail Price: <span class="product-card_price_msrp_strike">${d.retail}</span></div>`:'',nex=d.nex?`<div class="product-card_price_regular"${sale?' style="text-decoration:line-through"':''}>NEX Price <span>${d.nex}</span></div>`:'',saleLine=sale?`<div class="product-card_price_regular" style="color:#d61919"><span>${d.sale}</span></div>`:'';return`<div class="product-card_content product-card_slider relative">${badgeHTML(d.badge)}<div class="product-card_content_images p-0 mb-3"><a href="${d.link}"><img src="${d.image}"></a></div><div class="product-card_content_description">${d.brand?`<p class="product-card_brand"><a href="${d.link}">${d.brand}</a></p>`:''}${d.name?`<div class="product-card_name">${d.name}</div>`:''}${retail}${nex}${saleLine}${d.reviews?`<div class="product-card_reviews mt-1"><img class="ratingsStars" src="/ux/img/stars/rating-${file}.gif"> <span>(${d.reviews})</span></div>`:''}</div></div>`}
 const owl=`<script>$(document).ready(function(){const c=$('.recently-viewed-carousel'),n=c[0].children.length;c.owlCarousel({loop:false,rewind:true,margin:10,nav:true,slideBy:4,navText:['<span class=&quot;fas fa-chevron-left fa-2x&quot;></span>','<span class=&quot;fas fa-chevron-right fa-2x&quot;></span>'],dots:true,responsive:{0:{items:3,loop:true},361:{items:3,loop:n>1},571:{items:3,loop:n>2},721:{items:4,loop:n>3},857:{items:5,loop:n>4},993:{items:5,loop:n>5}}});});<\/script>`;
-
-function build(){
- const list=gather(),title=$("#title").val().trim();
- $("#prevTitle").text(title);
- preview.html(list.map(prevCard).join(''));
- exp.val('<div class="sg-content col-12 row no-gutters"><div class="sg-content-item col-12 row align-items-center mx-0 my-4">'+(title?`<h3 class="col-12 bold mb-4" style="font-size:18px;">${title}</h3>`:'')+'<div class="owl-carousel recently-viewed-carousel owl-theme">'+list.map(exportCard).join('')+'</div></div></div>'+owl);
-}
-
+function build(){const list=gather(),title=$("#title").val().trim();$("#prevTitle").text(title);preview.html(list.map(prevCard).join(''));exp.val('<div class="sg-content col-12 row no-gutters"><div class="sg-content-item col-12 row align-items-center mx-0 my-4">'+(title?`<h3 class="col-12 bold mb-4" style="font-size:18px;">${title}</h3>`:'')+'<div class="owl-carousel recently-viewed-carousel owl-theme">'+list.map(exportCard).join('')+'</div></div></div>'+owl)}
 $('#add').on('click',()=>add());
 cards.on('click','.del',e=>{$(e.target).closest('[data-card]').remove();renumber();build()});
 cards.on('input','input,select',build);
 $('.toggle').on('change',function(){$(`.field-${this.value}`).toggle(this.checked);build()});
-new Sortable(preview[0],{animation:150,onEnd:e=>{const r=cards.children().eq(e.oldIndex).detach();e.newIndex===0?cards.prepend(r):cards.children().eq(e.newIndex).before(r);renumber();build();}});
-
-$("#importBtn").on("click",function(){
-  const raw=$("#importArea").val().trim();if(!raw)return;
-  const $tmp=$("<div>").html(raw),$b=$tmp.find(".product-card_content");
-  if(!$b.length){alert("No product-card_content blocks found.");return;}
-  cards.empty();
-  $b.each(function(){
-    const $c=$(this),gif=$c.find(".ratingsStars").attr("src")||"";
-    add({
-      link:$c.find("a").attr("href")||"",
-      image:$c.find("img").attr("src")||"",
-      brand:$c.find(".product-card_brand").text().trim(),
-      name:$c.find(".product-card_name").text().trim(),
-      retail:$c.find(".product-card_price_msrp_strike").text().trim(),
-      nex:$c.find(".product-card_price_regular span").first().text().trim(),
-      sale:$c.find(".product-card_price_regular[style*=color] span").text().trim(),
-      badge:$c.find("span").first().text().trim(),
-      reviews:($c.find(".product-card_reviews span").text().match(/\d+/)||[""])[0],
-      rating:(gif.match(/rating-(\d_\d|\d_0)/)||["",""])[1].replace("_",".")
-    });
+new Sortable(preview[0],{animation:150,onEnd:e=>{const row=cards.children().eq(e.oldIndex).detach();e.newIndex===0?cards.prepend(row):cards.children().eq(e.newIndex).before(row);renumber();build()}});
+$("#importBtn").on("click",function(){const raw=$("#importArea").val().trim();if(!raw)return;const $tmp=$("<div>").html(raw),$b=$tmp.find(".product-card_content");if(!$b.length){alert("No product-card_content blocks found.");return}cards.empty();$b.each(function(){const $c=$(this),gif=$c.find(".ratingsStars").attr("src")||"";add({link:$c.find("a").attr("href")||"",image:$c.find("img").attr("src")||"",brand:$c.find(".product-card_brand").text().trim(),name:$c.find(".product-card_name").text().trim(),retail:$c.find(".product-card_price_msrp_strike").text().trim(),nex:$c.find(".product-card_price_regular span").first().text().trim(),sale:$c.find(".product-card_price_regular[style*=color] span").text().trim(),badge:$c.find("span").first().text().trim(),reviews:($c.find(".product-card_reviews span").text().match(/\d+/)||[""])[0],rating:(gif.match(/rating-(\d_\d|\d_0)/)||["",""])[1].replace("_",".")});});renumber();build()});
+add();build();
+</script>
+</body>
+</html>
